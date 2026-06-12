@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#111827">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="规则怪谈">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="规则怪谈">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>异星规则：生态圈 - 规则怪谈</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg-dark: #0a0e1a; --bg-panel: #111827; --text-main: #e2e8f0;
+  --text-dim: #64748b; --accent-red: #ef4444; --accent-purple: #a855f7;
+  --accent-blue: #3b82f6; --accent-green: #10b981; --accent-amber: #f59e0b;
+  --border: #1e293b;
+}
+body {
+  background: var(--bg-dark); color: var(--text-main);
+  font-family: 'Courier New', monospace; min-height: 100vh;
+  overflow-y: auto; position: relative;
+}
+body::before {
+  content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.25) 50%);
+  background-size: 100% 4px; pointer-events: none; z-index: 1000; opacity: 0.3;
+}
+@keyframes flicker {
+  0% { opacity: 0.97; } 5% { opacity: 0.95; } 10% { opacity: 0.97; }
+  15% { opacity: 0.94; } 20% { opacity: 0.97; } 100% { opacity: 0.97; }
+}
+.container {
+  max-width: 900px; margin: 0 auto; padding: 20px;
+  min-height: 100vh; display: flex; flex-direction: column;
+  animation: flicker 4s infinite;
+}
+.status-bar {
+  display: flex; justify-content: space-between;
+  padding: 12px 16px; background: var(--bg-panel);
+  border: 1px solid var(--border); border-radius: 8px;
+  margin-bottom: 12px; font-size: 14px; letter-spacing: 1px; flex-shrink: 0;
+}
+.status-item { display: flex; align-items: center; gap: 8px; }
+.status-label { color: var(--text-dim); }
+.status-value { font-weight: bold; }
+.oxygen { color: var(--accent-blue); }
+.health { color: var(--accent-green); }
+.time { color: var(--accent-amber); }
+.temp { color: var(--accent-red); }
+.backpack-bar {
+  display: flex; gap: 8px; padding: 10px 14px;
+  background: var(--bg-panel); border: 1px solid var(--border);
+  border-radius: 8px; margin-bottom: 12px; flex-shrink: 0;
+  min-height: 48px; align-items: center; overflow-x: auto;
+  flex-wrap: wrap;
+}
+.backpack-label { color: var(--text-dim); font-size: 12px; margin-right: 4px; white-space: nowrap; }
+.backpack-empty { color: var(--text-dim); font-size: 12px; font-style: italic; }
+.backpack-item {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 12px; background: rgba(59,130,246,0.1);
+  border: 1px solid rgba(59,130,246,0.3); border-radius: 6px;
+  font-size: 13px; color: var(--accent-blue); white-space: nowrap;
+  cursor: pointer; transition: all 0.2s; user-select: none;
+}
+.backpack-item:hover { background: rgba(59,130,246,0.25); border-color: var(--accent-blue); }
+.backpack-item:active { transform: scale(0.95); }
+.item-icon { font-size: 16px; }
+.main-display {
+  flex: 1; background: var(--bg-panel); border: 1px solid var(--border);
+  border-radius: 8px; padding: 24px; overflow-y: auto;
+  position: relative; margin-bottom: 12px; min-height: 0;
+}
+.scene-title {
+  font-size: 18px; color: var(--accent-purple); margin-bottom: 12px;
+  text-transform: uppercase; letter-spacing: 2px;
+  border-bottom: 1px solid var(--border); padding-bottom: 8px;
+}
+.scene-desc { line-height: 1.8; font-size: 15px; margin-bottom: 16px; }
+.scene-desc .highlight-red { color: var(--accent-red); text-shadow: 0 0 8px rgba(239,68,68,0.4); }
+.scene-desc .highlight-purple { color: var(--accent-purple); text-shadow: 0 0 8px rgba(168,85,247,0.4); }
+.scene-desc .highlight-blue { color: var(--accent-blue); text-shadow: 0 0 8px rgba(59,130,246,0.4); }
+.scene-desc .highlight-green { color: var(--accent-green); text-shadow: 0 0 8px rgba(16,185,129,0.4); }
+.scene-desc .highlight-amber { color: var(--accent-amber); text-shadow: 0 0 8px rgba(245,158,11,0.4); }
+.atmosphere {
+  padding: 12px; background: rgba(30,41,59,0.5);
+  border-left: 3px solid var(--accent-blue); margin-bottom: 16px;
+  font-size: 13px; color: var(--text-dim); font-style: italic; flex-shrink: 0;
+}
+.choices-area { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; flex-shrink: 0; }
+.choice-btn {
+  padding: 14px 18px; background: var(--bg-panel); border: 1px solid var(--border);
+  color: var(--text-main); cursor: pointer; text-align: left;
+  font-family: inherit; font-size: 14px; border-radius: 6px; transition: all 0.2s;
+  white-space: normal; line-height: 1.5;
+}
+.choice-btn:hover { background: #1e293b; border-color: var(--accent-purple); transform: translateX(4px); }
+.log-area {
+  margin-bottom: 12px; padding: 12px;
+  background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3);
+  border-radius: 6px; font-size: 13px; display: none; flex-shrink: 0;
+}
+.log-area.active { display: block; }
+.log-title { color: var(--accent-red); font-weight: bold; margin-bottom: 4px; }
+.log-area.success { background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.3); }
+.log-area.success .log-title { color: var(--accent-green); }
+.toolbar { display: flex; gap: 12px; justify-content: center; flex-shrink: 0; }
+.tool-btn {
+  padding: 10px 20px; background: var(--bg-panel); border: 1px solid var(--border);
+  color: var(--text-dim); cursor: pointer; font-family: inherit;
+  font-size: 13px; border-radius: 6px; transition: all 0.2s;
+}
+.tool-btn:hover { color: var(--text-main); border-color: var(--accent-purple); }
+.tool-btn.active { background: var(--accent-purple); color: white; border-color: var(--accent-purple); }
+.rules-modal {
+  display: none; position: fixed; top: 0; left: 0;
+  width: 100%; height: 100%; background: rgba(0,0,0,0.85);
+  z-index: 2000; justify-content: center; align-items: center; padding: 20px;
+}
+.rules-modal.active { display: flex; }
+.rules-paper {
+  background: #f5f5dc; color: #1a1a1a; max-width: 500px; width: 100%;
+  padding: 32px; border-radius: 2px; position: relative;
+  font-family: 'Courier New', monospace; box-shadow: 0 0 30px rgba(0,0,0,0.5);
+  transform: rotate(-1deg); max-height: 80vh; overflow-y: auto;
+}
+.rules-paper::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background: repeating-linear-gradient(transparent, transparent 28px, #e8e4c9 28px, #e8e4c9 29px);
+  pointer-events: none; opacity: 0.5;
+}
+.rules-paper h2 {
+  font-size: 20px; margin-bottom: 20px; text-align: center;
+  border-bottom: 2px solid #1a1a1a; padding-bottom: 8px;
+  position: relative; z-index: 1;
+}
+.blood-stain {
+  position: absolute; width: 40px; height: 40px;
+  background: radial-gradient(circle, rgba(139,0,0,0.3) 0%, transparent 70%);
+  border-radius: 50%; pointer-events: none;
+}
+.rule-item {
+  margin-bottom: 16px; padding-left: 8px; line-height: 1.6;
+  font-size: 14px; position: relative; z-index: 1;
+}
+.rule-item.locked { color: #999; font-style: italic; }
+.rule-item.unlocked { color: #1a1a1a; }
+.rule-number { font-weight: bold; color: #8b0000; }
+.rules-close {
+  display: block; margin: 20px auto 0; padding: 8px 24px;
+  background: #1a1a1a; color: #f5f5dc; border: none; cursor: pointer;
+  font-family: inherit; font-size: 14px; position: relative; z-index: 1;
+}
+.rules-close:hover { background: #333; }
+.ending-screen {
+  display: none; position: fixed; top: 0; left: 0;
+  width: 100%; height: 100%; background: var(--bg-dark);
+  z-index: 3000; flex-direction: column;
+  justify-content: center; align-items: center;
+  padding: 40px; text-align: center; overflow-y: auto;
+}
+.ending-screen.active { display: flex; }
+.ending-title { font-size: 32px; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 4px; }
+.ending-desc { max-width: 600px; line-height: 2; font-size: 16px; margin-bottom: 20px; }
+.ending-truth { max-width: 600px; line-height: 1.8; font-size: 14px; margin-bottom: 20px; text-align: left; background: rgba(30,41,59,0.6); padding: 16px; border-radius: 8px; border-left: 3px solid var(--accent-purple); }
+.ending-btn {
+  padding: 12px 32px; background: transparent; border: 2px solid var(--text-main);
+  color: var(--text-main); cursor: pointer; font-family: inherit;
+  font-size: 14px; text-transform: uppercase; letter-spacing: 2px; transition: all 0.3s;
+}
+.ending-btn:hover { background: var(--text-main); color: var(--bg-dark); }
+@keyframes warning { 0%,100% { background: rgba(239,68,68,0.1); } 50% { background: rgba(239,68,68,0.3); } }
+.warning-flash { animation: warning 1s infinite; }
+.start-btn {
+  display: none; padding: 16px 32px; background: var(--accent-purple);
+  color: white; border: none; border-radius: 8px;
+  font-size: 16px; cursor: pointer; margin: 20px auto; font-family: inherit;
+}
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-dark); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+@media (max-width: 600px) {
+  .container { padding: 8px; }
+  .status-bar { font-size: 12px; flex-wrap: wrap; gap: 6px; padding: 8px 10px; }
+  .status-item { flex: 1 1 30%; min-width: 80px; }
+  .status-item:last-child { flex: 1 1 100%; }
+  .main-display { padding: 12px; font-size: 14px; }
+  .scene-title { font-size: 15px; letter-spacing: 1px; }
+  .scene-desc { font-size: 14px; line-height: 1.7; }
+  .atmosphere { font-size: 11px; padding: 8px; margin-bottom: 10px; }
+  .backpack-bar { padding: 6px 8px; gap: 6px; }
+  .backpack-item { font-size: 12px; padding: 4px 8px; }
+  .item-icon { font-size: 14px; }
+  .choice-btn { padding: 10px 12px; font-size: 13px; }
+  .tool-btn { padding: 8px 14px; font-size: 12px; }
+  .rules-paper { padding: 20px; transform: rotate(0deg); }
+  .rule-item { font-size: 12px; }
+  .ending-title { font-size: 22px; }
+  .ending-desc { font-size: 13px; }
+  .ending-truth { font-size: 12px; padding: 10px; }
+}
+</style>
+<base target="_blank">
+</head>
+<body>
+<div class="container">
+  <div class="status-bar">
+    <div class="status-item"><span class="status-label">O2</span><span class="status-value oxygen" id="oxygen">--</span></div>
+    <div class="status-item"><span class="status-label">HP</span><span class="status-value health" id="health">--</span></div>
+    <div class="status-item"><span class="status-label">TIME</span><span class="status-value time" id="time">--</span></div>
+    <div class="status-item"><span class="status-label">TEMP</span><span class="status-value temp" id="temp">--</span></div>
+  </div>
+  <div class="backpack-bar" id="questBackpackBar">
+    <span class="backpack-label">[任务物品]</span>
+    <span class="backpack-empty" id="questBackpackEmpty">空</span>
+  </div>
+  <div class="backpack-bar" id="healBackpackBar">
+    <span class="backpack-label">[恢复物品]</span>
+    <span class="backpack-empty" id="healBackpackEmpty">空</span>
+  </div>
+  <div class="main-display" id="mainDisplay">
+    <div class="scene-title" id="sceneTitle">系统初始化</div>
+    <div class="atmosphere" id="atmosphere">等待系统初始化</div>
+    <div class="scene-desc" id="sceneDesc">如果页面长时间无响应，请点击下方按钮。<br><button class="start-btn" id="startBtn" onclick="initGame()">点击开始游戏</button></div>
+  </div>
+  <div class="log-area" id="logArea">
+    <div class="log-title" id="logTitle">警告</div>
+    <div id="logContent"></div>
+  </div>
+  <div class="choices-area" id="choicesArea"></div>
+  <div class="toolbar">
+    <button class="tool-btn" id="btnRules" onclick="toggleRules()">查看纸条</button>
+    <button class="tool-btn" onclick="restartGame()">重新开始</button>
+  </div>
+</div>
+<div class="rules-modal" id="rulesModal">
+  <div class="rules-paper">
+    <div class="blood-stain" style="top:20px;right:30px;"></div>
+    <div class="blood-stain" style="bottom:40px;left:20px;width:60px;height:30px;"></div>
+    <h2>生存规则</h2>
+    <div id="rulesList"></div>
+    <button class="rules-close" onclick="toggleRules()">收起纸条</button>
+  </div>
+</div>
+<div class="ending-screen" id="endingScreen">
+  <div class="ending-title" id="endingTitle"></div>
+  <div class="ending-desc" id="endingDesc"></div>
+  <div class="ending-truth" id="endingTruth"></div>
+  <button class="ending-btn" onclick="restartGame()">再次探索</button>
+</div>
+
+<script>
+console.log('SCRIPT_LOADED');
+
+var GameState = {
+  oxygen: 100, health: 100, time: 360, day: 1,
+  temperature: -40, inventory: [], flags: {},
+  rulesUnlocked: [false, false, false, false, false, false, false, false, false],
+  currentScene: 'awakening', gameOver: false,
+  discoveredTruth: []
+};
+
+var ITEM_ICONS = {
+  '数据平板': '📟', '应急补给': '🥫', '氧气罐': '🫙', '医疗包': '💊',
+  '规则纸条': '📜', '红色孢子样本': '🔴', '数据核心': '💾', '完整笔记': '📓',
+  '燃料晶体': '💎', '引擎核心': '⚙️', '信号发射器': '📡', '切割器': '🔪',
+  '金属样本罐': '🧪', '紫色地衣样本': '🟣', '发光虫尸体': '🪲', '荆棘刺': '🌵',
+  '望远镜': '🔭', '备用电池': '🔋', '古老岩画拓片': '🗿', '透明冰晶': '❄️'
+};
+
+var ITEM_EFFECTS = {
+  '医疗包': { hp: 35, o2: 0, msg: '使用了医疗包。伤口开始愈合。' },
+  '氧气罐': { hp: 0, o2: 50, msg: '更换了氧气罐。呼吸顺畅多了。' },
+  '应急补给': { hp: 15, o2: 20, msg: '吃了应急补给。体力有所恢复。' }
+};
+
+// 规则：普通话版本，开局全部完整解锁
+var RULES = [
+  { id: 0, text: '天气热的时候，那些红色植物盛开的地方千万别靠近。它们喷出来的气体闻起来甜甜的，但是有毒，专门往暖和的肺里钻。' },
+  { id: 1, text: '听到滴答声超过三声之后，马上趴下捂住耳朵。去找声音的人，声音也会找到你。' },
+  { id: 2, text: '看到地上有蓝色晶体，一定要绕着走，千万别踩上去。踩碎晶体的声音会唤醒地下的东西，而且碎片会释放神经毒素。' },
+  { id: 3, text: '感觉热就往冷的地方跑，感觉冷就往热的地方跑。舒服安逸的地方，往往藏着危险。' },
+  { id: 4, text: '看到熟人在向你招手，千万别回应。这个星球上没有你认识的人。' },
+  { id: 5, text: '天黑之前，一定要找到紫色地衣躲起来。夜里空气会下沉，沉下来的气体有毒。' },
+  { id: 6, text: '那些看起来特别漂亮、会发光的东西，千万不要碰。那是诱饵，专门用来吸引猎物上钩的。' },
+  { id: 7, text: '脚陷进软泥里，马上脱掉鞋子快跑。身体越重，陷得越快。' },
+  { id: 8, text: '这个星球本来没有风。如果感觉到有气流，那是某种巨大生物在呼吸。' }
+];
+
+var TRUTHS = [
+  '【规则一 真相】红色巨型植物是K-774的捕食性生产者。它们只在高温时激活消化酶，红色花瓣是诱饵。低温时它们只是普通的固碳植物。',
+  '【规则二 真相】滴答声来自裂隙猎手——一种穴居的声波定位捕食者。它们通过回声轮廓识别猎物，蹲下并捂住头盔可以破坏你的轮廓信号。',
+  '【规则三 真相】蓝色晶体是硅基固氮菌的休眠体，构成星球土壤的分解者网络。踩碎它们会释放神经毒素，并触发周围晶体的防御性结晶生长。',
+  '【规则四 真相】地热异常区下方栖息着岩浆蠕虫——一种对温度敏感的消费者。它们会在地热活跃时上浮觅食，所以温暖意味着捕食者正在接近。',
+  '【规则五 真相】拟态真菌是一种寄生消费者，会释放致幻孢子。感染者会在幻觉中看到死去的同伴招手，跟随它们会走进真菌的消化菌丝区。',
+  '【规则六 真相】夜间大气会沉降硫化物。紫色地衣是唯一能进行暗反应固硫的生产者，它们聚集的背风处是唯一的氧气富集区。',
+  '【规则七 真相】发光诱饵虫是一种小型飞行捕食者，腹部有生物发光器官。它们用美丽吸引猎物靠近，然后喷射强酸消化液。',
+  '【规则八 真相】软泥沼泽是由腐生菌丝和酸性酶构成的分解者池。靴子会压破菌丝膜，让你的体重直接作用在酸性消化液上，加速溶解。',
+  '【规则九 真相】大气中漂浮着巨型浮游捕食者——透明的气囊生物，翼展可达十米。它们的游动产生气流，专门追踪温血动物的热辐射。'
+];
+
+var SCENES = {
+  awakening: {
+    title: '休眠舱 - 飞船内部',
+    atmosphere: '温度：18°C | 湿度：45% | 状态：重力正常',
+    desc: '你缓缓睁开眼睛。休眠舱的玻璃罩上凝结着一层薄霜，舱内的蓝色指示灯以稳定的节奏闪烁着。<br><br>你醒来了。作为深空探索者7号的唯一幸存船员，你的飞船在47年前迫降在这颗编号K-774的未知行星上。休眠系统将你保存至今，而现在，警报声唤醒了你。<br><br>舱门滑开，你踉跄着走出。飞船的走廊昏暗而寂静，应急灯在天花板上投下红色的光斑。你的宇航服挂在舱壁上，氧气储备显示100%。<br><br>走廊尽头，医疗舱的门敞开着。你闻到了一股腐臭味。',
+    choices: [
+      { text: '前往医疗舱查看情况', next: 'medical_bay', effect: function() { addLog('你走向医疗舱。'); } }
+    ]
+  },
+  medical_bay: {
+    title: '医疗舱',
+    atmosphere: '温度：8°C | 有腐臭味 | 生命维持系统离线',
+    desc: '医疗舱内一片狼藉。休眠舱里躺着一具干尸，穿着和你一样的宇航服。他的手边有一个数据平板，屏幕已经碎裂。<br><br>在储物柜里，你找到了额外的氧气罐和医疗包。角落里还有一个密封的金属盒，标签上写着K-774 样本A-7 危险。<br><br>最引人注目的是干尸的另一只手——紧紧攥着一张泛黄的纸条。纸条边缘有褐色的污渍，像是血。你掰开僵硬的手指，纸条上写满了九条生存规则，字迹颤抖。翻到背面，一行小字：<br><br>规则是果，生态是因。——林德<br><br>你获得了【规则纸条】（九条规则全部解锁）',
+    choices: [
+      { text: '拿走氧气罐、医疗包和纸条，前往气闸', next: 'airlock', effect: function() {
+        GameState.inventory.push('氧气罐'); GameState.inventory.push('医疗包'); GameState.inventory.push('规则纸条');
+        for (var i = 0; i < 9; i++) unlockRule(i);
+        GameState.oxygen = 100;
+        addLog('获得物品：氧气罐、医疗包、规则纸条。氧气已补满。九条规则全部解锁。');
+      }},
+      { text: '搜索尸体，看看还有什么线索', next: 'medical_bay_search', effect: function() { GameState.health -= 5; } }
+    ]
+  },
+  medical_bay_search: {
+    title: '深入搜索',
+    atmosphere: '温度：8°C | 腐臭味加重',
+    desc: '你翻找干尸的口袋。除了一些个人物品——一张照片，上面是地球的海岸线——你还发现了一个小型数据核心，藏在宇航服的内衬里。<br><br>数据核心上贴着标签：营地坐标。紫色地衣。<br><br>你获得了【数据核心】。<br><br>干尸的手指上有一道奇怪的伤痕，像是被某种植物刺穿后愈合的疤痕。',
+    choices: [
+      { text: '拿走所有物品，前往气闸', next: 'airlock', effect: function() {
+        GameState.inventory.push('氧气罐'); GameState.inventory.push('医疗包'); GameState.inventory.push('规则纸条'); GameState.inventory.push('数据核心');
+        for (var i = 0; i < 9; i++) unlockRule(i);
+        GameState.oxygen = 100;
+        addLog('获得物品：氧气罐、医疗包、规则纸条、数据核心。');
+      }}
+    ]
+  },
+  observation_deck: {
+    title: '观测甲板',
+    atmosphere: '温度：15°C | 重力：正常 | 视野：全景',
+    desc: '你沿着走廊向上，来到了飞船的观测甲板。这里有一台老旧的望远镜，镜头上积满了灰尘，但还能使用。<br><br>你擦了擦镜头，看向窗外。K-774的地表在望远镜中呈现出更多细节：<br><br>北方是一片红色丛林，那些管状植物像血管一样在地表蔓延，偶尔喷出淡红色的雾气。<br><br>西方是一片蓝色的平原，晶体在阳光下闪烁，形成一片有规律的脉动波纹。<br><br>东方是一条深邃的山谷，谷间有奇怪的气流在盘旋，像是某种巨大生物的呼吸。<br><br>南方是飞船残骸和一片废墟，那里可能还有遗留的物资。<br><br>你获得了【望远镜】。',
+    choices: [
+      { text: '前往医疗舱搜索物资', next: 'medical_bay', effect: function() { GameState.inventory.push('望远镜'); addLog('获得物品：望远镜。'); } },
+      { text: '直接前往气闸，准备出舱', next: 'airlock', effect: function() { GameState.inventory.push('望远镜'); GameState.oxygen -= 5; addLog('获得物品：望远镜。你跳过了医疗舱。'); } }
+    ]
+  },
+  airlock: {
+    title: '气闸室 - 外面的世界',
+    atmosphere: '温度：-5°C | 外部气压：0.8atm | 辐射：正常',
+    desc: '你穿戴好宇航服，检查密封性。气闸室的观察窗外是一片陌生的景象。<br><br>K-774行星的天空呈现出病态的紫红色，两轮月亮高悬在天际——一轮苍白，一轮泛着诡异的蓝光。地表覆盖着黑色的沙砾，远处可以看到起伏的山脉轮廓。<br><br>舱外门打开了。你迈出了飞船。<br><br>脚下的黑色沙砾发出奇特的咯吱声。这不是普通的沙子——它太黑了，几乎吸收所有光线。你抬头望去，地平线处有一片红色的光芒在微微脉动。远处还有蓝色的微光，像是冻结的海洋。右侧的山谷间，似乎有紫色的阴影在移动。<br><br>你的地图显示，飞船迫降在一片盆地的边缘。四周有四个方向可以探索。',
+    choices: [
+      { text: '向北：红色光芒的方向', next: 'red_jungle', effect: function() { advanceTime(180); } },
+      { text: '向西：蓝色微光的方向', next: 'crystal_plain', effect: function() { advanceTime(180); } },
+      { text: '向东：风暴山谷的方向', next: 'storm_valley', effect: function() { advanceTime(180); } },
+      { text: '向南：飞船残骸与废墟', next: 'ship_debris', effect: function() { advanceTime(60); } }
+    ]
+  },
+  ship_debris: {
+    title: '飞船残骸周边',
+    atmosphere: '温度：-42°C | 风速：0 | 异常安静',
+    desc: '你在飞船残骸周围搜索。大部分舱体已经埋在黑色沙砾下，但引擎舱的外壳裂开了一道口子。<br><br>在残骸的更远处，你看到了一个废弃的前哨站——金属结构已经被风沙侵蚀了一半，但主建筑还矗立着。门口有一些脚印，不是人类的，像是某种大型生物的爪印。<br><br>你注意到地面有一些蓝色的晶体碎片，在黑色沙砾中格外显眼。',
+    choices: [
+      { text: '进入引擎舱检查能源状况', next: 'engine_room', effect: function() { addLog('你爬进了引擎舱。'); } },
+      { text: '进入前哨站探索', next: 'outpost', effect: function() { addLog('你走向废弃的前哨站。'); } },
+      { text: '沿着爪印的方向追踪', next: 'canyon', effect: function() { addLog('你跟随爪印，进入了一条裂隙。'); advanceTime(60); } },
+      { text: '返回飞船，前往其他方向', next: 'airlock', effect: function() { addLog('你返回了飞船。'); } }
+    ]
+  },
+  engine_room: {
+    title: '引擎舱',
+    atmosphere: '温度：+35°C | 辐射：低 | 有金属烧焦味',
+    desc: '引擎舱内部比想象中完整。主引擎已经报废，但旁边的备用能源舱还有反应。温度在持续升高——从+35°C到+45°C，你的宇航服隔热层开始报警。<br><br>你在能源舱的角落里找到了一块还能用的【备用电池】，以及一个损坏不严重的【信号发射器】。<br><br>墙壁上有前任船员用记号笔写的字：感觉热就往冷的地方跑，感觉冷就往热的地方跑。——他们显然也发现了这里的异常。<br><br>这里越来越热了。',
+    choices: [
+      { text: '拿走备用电池和信号发射器，快速离开', next: 'ship_debris', effect: function() { 
+        GameState.inventory.push('备用电池'); GameState.inventory.push('信号发射器'); 
+        addLog('获得物品：备用电池、信号发射器。'); 
+      } },
+      { text: '继续检查引擎核心', next: 'engine_overheat', effect: function() { GameState.health -= 25; } }
+    ]
+  },
+  engine_overheat: {
+    title: '引擎过热',
+    atmosphere: '温度：+70°C | 辐射：高 | 致命',
+    desc: '你无视了温度警告，继续深入引擎舱。主引擎的外壳突然发出刺耳的金属变形声，然后是一声闷响——冷却管道爆裂了。<br><br>高温蒸汽瞬间充满了舱室。你的宇航服隔热层达到了极限，面罩内侧开始起雾。你跌跌撞撞地后退，但腿部已经被烫伤。<br><br>你勉强爬出了引擎舱，身后传来金属坍塌的声音。',
+    choices: [
+      { text: '使用医疗包，撤离到安全区域', next: 'ship_debris', effect: function() { 
+        consumeItem('医疗包'); GameState.health -= 25; GameState.oxygen -= 15; 
+        addLog('你勉强逃脱了。引擎舱在你身后坍塌。'); 
+      } }
+    ]
+  },
+  outpost: {
+    title: '废弃前哨站',
+    atmosphere: '温度：-38°C | 室内：避风 | 有腐臭味',
+    desc: '前哨站内部比想象中完整。墙上贴满了褪色的地图和笔记，桌上有一台还能工作的电脑。角落里堆着几个箱子，其中一个标着补给。<br><br>你打开箱子，找到了一些应急食品、一个备用氧气罐、和一本手写日志。日志的最后一页写着：<br><br>第42天：我们找到了紫色地衣。它们在夜间释放氧气。只要待在地衣背面，就能熬过夜晚。但地衣只在背风处生长。<br><br>第47天：有人看到了同伴在招手。我跟了过去。那不是人。是孢子。<br><br>日志在这里中断了。你注意到墙角有一些红色的粉末，像是干涸的孢子。<br><br>你获得了【应急补给】x2，【氧气罐】。',
+    choices: [
+      { text: '搜索前哨站地下室', next: 'outpost_basement', effect: function() { addLog('你打开了地下室的门。'); } },
+      { text: '拿走补给，返回飞船方向', next: 'airlock', effect: function() {
+        GameState.inventory.push('应急补给'); GameState.inventory.push('应急补给'); GameState.inventory.push('氧气罐');
+        addLog('获得物品：应急补给x2、氧气罐。');
+      }},
+      { text: '前往前哨站后方的酸性湖泊', next: 'acid_lake', effect: function() { advanceTime(60); } }
+    ]
+  },
+  outpost_basement: {
+    title: '前哨站地下室',
+    atmosphere: '温度：-10°C | 温度异常升高 | 地面震动',
+    desc: '地下室的空气比上层温暖得多。你的宇航服温度计显示温度在迅速攀升——从-10°C到+15°C，而且还在继续。<br><br>地下室的地板上有裂缝，从裂缝中透出暗红色的光芒。你听到了某种蠕动声，从地底深处传来。墙壁上的蓝色晶体开始发光，频率越来越快。<br><br>这里显然不安全。',
+    choices: [
+      { text: '立即退回上层，离开前哨站', next: 'outpost', effect: function() { addLog('你迅速退回上层。身后的地板传来碎裂声。'); } },
+      { text: '继续深入，看看裂缝下面有什么', next: 'geothermal_trap', effect: function() { GameState.health -= 30; } }
+    ]
+  },
+  geothermal_trap: {
+    title: '地热裂缝',
+    atmosphere: '温度：+60°C | 地面剧烈震动 | 硫磺味浓烈',
+    desc: '你无视了温度的警告。地面突然裂开，喷出灼热的气体和硫磺味的蒸汽。你的宇航服隔热层开始报警。<br><br>从裂缝中伸出了某种半透明的、脉动的管状结构，直径足有两米。它表面覆盖着黏液，正缓缓向上蠕动。管壁内侧有环状的牙齿，像是某种蠕虫的口器。<br><br>这是一颗生物。K-774的地壳下藏着它们。温度升高时，它们会浮上来觅食。<br><br>你拼命逃跑，但高温已经损坏了你的宇航服腿部密封。氧气开始泄漏。',
+    choices: [
+      { text: '使用应急修补胶带，快速撤离', next: 'outpost', effect: function() { GameState.oxygen -= 20; GameState.health -= 30; addLog('你勉强逃脱了。宇航服受损，氧气泄漏。'); } }
+    ]
+  },
+  acid_lake: {
+    title: '酸性湖泊',
+    atmosphere: '温度：-35°C | 雾气：腐蚀性 | pH值：2',
+    desc: '前哨站后方是一片低洼地带，积满了乳白色的液体。液体表面不断冒出气泡，破裂时释放出淡黄色的雾气。你的宇航服探测器报警：雾气具有强腐蚀性。<br><br>湖边生长着一些扭曲的植物，它们的叶子是黑色的，但根系浸泡在乳白色液体中。你注意到湖中央有一个金属物体——像是某种探测器的残骸。<br><br>雾气开始侵蚀你的头盔面罩，发出细微的嘶嘶声。你感到眼睛刺痛。',
+    choices: [
+      { text: '绕湖而行，不接触雾气', next: 'spore_meadow', effect: function() { GameState.health -= 8; addLog('雾气侵蚀了宇航服外层。微量酸液渗入。'); addLog('你绕过了酸性湖泊，前方出现一片孢子草甸。'); advanceTime(60); } },
+      { text: '尝试打捞湖中央的探测器', next: 'acid_death', effect: function() { GameState.health -= 50; } }
+    ]
+  },
+  acid_death: {
+    title: '酸液侵蚀',
+    atmosphere: '温度：-35°C | 腐蚀：致命',
+    desc: '你踏入了酸性湖泊。第一步，靴子开始溶解。第二步，酸性液体已经腐蚀了宇航服的密封。<br><br>你试图挣扎，但乳白色的液体像是有生命一样缠绕上来。湖底的黑色植物根系蠕动着，将你拖向深处。<br><br>你没有感到痛苦。酸液让你感到温暖，像是回到了母体。<br><br>一年后，湖边长出了一株新的黑色植物。它的根系中，闪烁着宇航服金属的光泽。',
+    choices: [
+      { text: '...', next: 'ending_dissolved', effect: function() { GameState.health = 0; } }
+    ]
+  },
+  spore_meadow: {
+    title: '孢子草甸',
+    atmosphere: '温度：-25°C | 孢子浓度：极高 | 漂浮物：发光',
+    desc: '你绕过酸性湖泊，进入了一片开阔的草甸。这里的地面覆盖着厚厚的灰色苔藓，苔藓上方漂浮着无数发光的孢子——它们像萤火虫一样在空中缓缓飘动，发出柔和的蓝绿色光芒。<br><br>美丽而致命。你的宇航服探测器报警：孢子浓度超过了安全阈值。每一颗发光孢子都是一颗微型种子，寻找温暖的宿主。<br><br>你必须快速通过这片草甸。停留越久，孢子附着在你的宇航服表面的数量就越多。',
+    choices: [
+      { text: '屏住呼吸，快速奔跑通过', next: 'fungal_forest', effect: function() { 
+        GameState.health -= 8; GameState.oxygen -= 10; 
+        addLog('你快速穿过了孢子草甸。少量孢子附着在宇航服表面，被过滤器清除。'); 
+        advanceTime(30); 
+      } },
+      { text: '小心慢行，观察这些孢子', next: 'spore_infection', effect: function() { GameState.health -= 35; } }
+    ]
+  },
+  spore_infection: {
+    title: '孢子感染',
+    atmosphere: '温度：-25°C | 孢子：附着 | 呼吸系统：受损',
+    desc: '你放慢了脚步，试图观察这些美丽的孢子。它们似乎对你的体温产生了兴趣——越来越多的孢子开始向你的方向聚集，像是一群被灯光吸引的飞蛾。<br><br>它们附着在宇航服的缝隙处，寻找任何可以进入的缺口。你的头盔过滤器发出尖锐的过载警报，然后熄灭了。<br><br>孢子进入了你的呼吸系统。你感到喉咙发痒，视野边缘开始出现蓝色的光斑。你跌跌撞撞地跑出了草甸，但损伤已经造成。',
+    choices: [
+      { text: '使用医疗包，强行清除孢子', next: 'fungal_forest', effect: function() { 
+        consumeItem('医疗包'); GameState.health -= 35; GameState.oxygen -= 20; 
+        addLog('你勉强清除了大部分孢子。但呼吸系统已经受损。'); 
+        advanceTime(60); 
+      } }
+    ]
+  },
+  fungal_forest: {
+    title: '菌丝森林',
+    atmosphere: '温度：-20°C | 孢子浓度：高 | 有幻觉风险',
+    desc: '你进入了一片由白色菌丝构成的森林。菌丝从地面延伸到岩壁，像是一张巨大的网。空气中弥漫着甜腻的气味，让你的头盔过滤器发出过载警报。<br><br>菌丝之间，你看到了一些人形的轮廓——它们由菌丝缠绕而成，站立在森林深处。其中一个向你招了手。<br><br>但那个身影看起来太像你的船长了。',
+    choices: [
+      { text: '转身离开，不回应', next: 'canyon', effect: function() { addLog('你转身离开。身后的菌丝森林传来细微的笑声。'); advanceTime(60); } },
+      { text: '走近那个身影，确认是不是船长', next: 'fungal_trap', effect: function() { GameState.health -= 40; } }
+    ]
+  },
+  fungal_trap: {
+    title: '拟态陷阱',
+    atmosphere: '温度：-20°C | 幻觉：严重 | 菌丝缠绕',
+    desc: '你走近了那个身影。它确实穿着船长的宇航服，但面罩下是一团蠕动的菌丝，正在模拟人类的五官。它向你伸出手，手掌裂开，露出里面密密麻麻的孢子囊。<br><br>你后退，但菌丝已经从地面缠上了你的靴子。孢子云包围了你。你的视野开始扭曲，看到了更多的"同伴"——他们都在向你招手，微笑。<br><br>你拼命挣脱，用切割器砍断了菌丝，跌跌撞撞地逃出了森林。但孢子已经渗入你的呼吸系统。',
+    choices: [
+      { text: '注射医疗包，强行压制幻觉', next: 'canyon', effect: function() { consumeItem('医疗包'); GameState.health -= 35; GameState.oxygen -= 15; addLog('你勉强逃脱了。幻觉持续了很久。'); } }
+    ]
+  },
+  red_jungle: {
+    title: '红色丛林边缘',
+    atmosphere: '温度：-15°C | 氧气浓度：2.1% | 孢子浓度：中等',
+    desc: '你接近了那片红色光芒。那不是灯光，而是一片丛林——如果它能被称为丛林的话。<br><br>这里的植物没有叶子。它们是高约三米的红色管状结构，表面覆盖着细密的绒毛，正以固定的节奏收缩和膨胀。每一次收缩，顶端就会喷出一团淡红色的雾气。<br><br>你的氧气读器显示了一个异常现象：这片区域的氧气浓度居然达到了2.1%。在这颗几乎无氧的星球上，这几乎是不可能的。<br><br>那些红色管状物正在制造氧气。它们是这颗星球的生产者。<br><br>你小心地绕行，但周围的灌木丛中突然伸出带刺的藤蔓，划破了你的宇航服外层。刺痛感传来。远处有几株更大的红色植物，花瓣像是肉质的一样肥厚。温度在升高。<br><br>丛林边缘有一片相对平坦的空地，那里的红色植物看起来比较矮小，没有开花。你感到疲惫，想要休息一下。',
+    choices: [
+      { text: '保持安全距离，采集样本后离开', next: 'canyon', effect: function() { GameState.health -= 12; addLog('被荆棘藤蔓划伤，宇航服外层受损。毒素微量渗入。'); GameState.inventory.push('红色孢子样本'); addLog('获得物品：红色孢子样本。'); } },
+      { text: '在丛林边缘的空地休息，恢复体力', next: 'red_jungle_rest', effect: function() { addLog('你决定在丛林边缘休息。'); advanceTime(60); } },
+      { text: '靠近那些更大的红色植物，它们似乎更茂盛', next: 'red_jungle_deep', effect: function() { addLog('温度在迅速升高。红色植物开始颤抖。'); } }
+    ]
+  },
+  red_jungle_rest: {
+    title: '丛林边缘 - 休息中',
+    atmosphere: '温度：+5°C | 氧气浓度：3.5% | 异常温暖',
+    desc: '你坐在空地上，背靠一块岩石，关闭了宇航服的部分系统以节省能源。周围的红色植物在低温下显得安静无害，只是偶尔喷出淡淡的雾气。<br><br>你吃了一些应急补给，感到体力在恢复。但就在这时，你注意到温度在缓慢上升——从-15°C到-5°C，再到+5°C。那些原本矮小的红色植物开始颤抖，表面的绒毛竖立起来。<br><br>然后，它们开花了。<br><br>红色的花瓣从管状顶端绽放，像是一张张血红的嘴。它们喷出的不再是淡红色雾气，而是浓稠的、近乎实体的红色孢子云。甜美的气味瞬间充满了你的头盔。<br><br>你试图站起来逃跑，但双腿发软。孢子已经渗入你的呼吸系统，视野被染成血红。你迷迷糊糊地想要挣扎，但中毒太深...',
+    choices: [
+      { text: '拼命注射医疗包，逃离丛林', next: 'canyon', effect: function() { 
+        consumeItem('医疗包'); 
+        GameState.health -= 50; 
+        GameState.oxygen -= 30; 
+        addLog('你勉强逃脱了。红色植物的孢子让你中毒很深。'); 
+      } }
+    ]
+  },
+  red_jungle_deep: {
+    title: '红色丛林深处',
+    atmosphere: '温度：+35°C | 氧气浓度：4.5% | 高温警告',
+    desc: '你靠近了一株大型红色植物。温度已经攀升到+28°C。它的表面绒毛突然竖立，像雷达一样转向你的方向。<br><br>下一秒，顶端喷出的不再是淡红色雾气，而是浓稠的、近乎实体的红色孢子云。它们瞬间包裹了你的头盔。<br><br>孢子开始附着在头盔面罩上，发出细微的嘶嘶声——它们在试图腐蚀玻璃，寻找缝隙。你的视野被染成血红，呼吸面罩内传来刺耳的警报。<br><br>你跌跌撞撞地后退，但已经吸入了少量孢子。你的肺部感到灼烧，理智开始模糊。你看到了幻觉：飞船完好无损，同伴们在向你招手...<br><br>等等。同伴？这里怎么会有同伴？',
+    choices: [
+      { text: '注射医疗包中的广谱抗生素，逃离丛林', next: 'canyon', effect: function() { consumeItem('医疗包'); GameState.health -= 40; GameState.oxygen -= 15; addLog('你感染了孢子，但勉强逃脱。幻觉持续了很久。'); } }
+    ]
+  },
+  crystal_plain: {
+    title: '蓝色晶体平原边缘',
+    atmosphere: '温度：-55°C | 电磁干扰：中等 | 晶体共鸣',
+    desc: '你来到了一片由蓝色晶体覆盖的平原。这些晶体大小不一，从沙粒到巨石都有，在地表形成了一片闪烁的蓝色海洋。<br><br>当你踩上去时，晶体发出清脆的共鸣声，像是某种乐器。更奇特的是，所有的晶体似乎以相同的频率微微发光，形成一种脉动的蓝色波纹，从平原中心向外扩散。<br><br>你的地质扫描器显示：这些晶体不是矿物。它们的内部有复杂的层状结构，像...像某种生物组织。<br><br>你小心绕行，但一块突出的晶体碎片划破了你的手套。冰冷的触感后，手指开始发麻。<br><br>在平原的中央，你看到一具宇航服——里面有人。他趴在地上，一只手向前伸着，似乎在死前想要触碰什么。他的脚下，蓝色晶体碎了一大片。',
+    choices: [
+      { text: '小心绕行，不踩碎任何晶体，检查尸体', next: 'crystal_ruin', effect: function() { GameState.health -= 8; addLog('被晶体碎片划伤，手指发麻。神经毒素微量侵入。'); GameState.inventory.push('数据核心'); addLog('获得物品：数据核心。'); } },
+      { text: '直线前进，踩碎挡路的晶体', next: 'crystal_awakening', effect: function() { GameState.health -= 50; } },
+      { text: '【紧急】天快黑了，寻找最近的庇护所', next: 'night_shelter', effect: function() { addLog('你放弃了探索晶体平原，寻找最近的背风处。'); advanceTime(30); }, condition: function() { var h = Math.floor(GameState.time / 60); return h >= 18; } }
+    ]
+  },
+  crystal_ruin: {
+    title: '晶体废墟',
+    atmosphere: '温度：-55°C | 晶体频率：稳定 | 避风',
+    desc: '你绕过了晶体网络，来到一片相对平坦的区域。这里的晶体排列呈现出某种规律，像是...像是被设计过的。晶体之间有一些空隙，形成了天然的路径。<br><br>你检查了那具尸体。他的宇航服上印着深空探索者3号的标志——比你早三十年。他的手边有一个数据核心，里面记录了晶体网络的地图。<br><br>地图显示，晶体平原的中央有一个空洞，那里的晶体从未被踩碎过。而所有被踩碎的区域，都长出了新的、更尖锐的晶体——像是在防御。<br><br>你获得了【数据核心】。<br><br>远处，你听到了滴答声。',
+    choices: [
+      { text: '跟随滴答声的方向', next: 'canyon', effect: function() { addLog('你跟随声音，进入了一条裂隙。'); advanceTime(60); } },
+      { text: '返回飞船方向', next: 'airlock', effect: function() { addLog('你返回了飞船。'); } }
+    ]
+  },
+  crystal_awakening: {
+    title: '神经毒素爆发',
+    atmosphere: '温度：-55°C | 晶体频率：急剧升高 | 地面：带电',
+    desc: '你踩碎了一块蓝色晶体。清脆的碎裂声在平原上回荡。<br><br>然后，一切都变了。<br><br>原本各自脉动的晶体突然同步，爆发出刺眼的蓝光。地面开始震动，更多的晶体从地下钻出，像牙齿一样咬合。你感到一阵强烈的眩晕从脚底传来——不是电击，是某种气体。<br><br>你踩碎的是菌丝网络的节点。它们在释放神经毒素。更多的晶体从地下刺出，你躲避不及，左腿被刺穿。<br><br>你拼命爬出晶体平原，身后留下一道血痕。晶体们开始发出高频尖啸，像是在...尖叫。',
+    choices: [
+      { text: '拖着伤腿逃离，使用医疗包', next: 'crystal_ruin', effect: function() { consumeItem('医疗包'); GameState.health -= 50; GameState.oxygen -= 20; addLog('你的左腿重伤。晶体平原记住了你的气味。'); } }
+    ]
+  },
+  canyon: {
+    title: '裂隙峡谷',
+    atmosphere: '温度：-38°C | 回声异常 | 岩壁纹理移动',
+    desc: '你进入了一条深邃的峡谷。两侧的岩壁呈现出不自然的几何形状，像是被某种力量精确切割的。<br><br>峡谷底部覆盖着黑色的细沙，你的每一步都发出沉闷的回响。但很快，你听到了另一种声音——<br><br>滴答。滴答。滴答。<br><br>声音来自峡谷深处，像是水滴，但节奏太过规律。你数了数：一秒、两秒、三秒...第四声。<br><br>然后第五声。第六声。<br><br>你的头盔显示器突然闪烁，声波频率与你的心跳开始同步。你感到一阵眩晕，仿佛有什么东西正在通过声音看你。<br><br>岩壁上有某种纹理在微微移动。你经过一处岩缝时，锋利的石片划破了你的肩膀。',
+    choices: [
+      { text: '立即蹲下，捂住头盔侧面', next: 'canyon_safe', effect: function() { GameState.health -= 10; addLog('岩缝石片划伤肩膀，出血量不大，但疼痛真实。'); addLog('你蹲下了。滴答声停止了。某种东西从头顶掠过。'); } },
+      { text: '寻找声源，举起切割器戒备', next: 'hunter_attack', effect: function() { GameState.health -= 60; } },
+      { text: '【紧急】天快黑了，寻找最近的庇护所', next: 'night_shelter', effect: function() { addLog('你放弃了深入峡谷，寻找最近的背风处。'); advanceTime(30); }, condition: function() { var h = Math.floor(GameState.time / 60); return h >= 18; } }
+    ]
+  },
+  hunter_attack: {
+    title: '裂隙猎手',
+    atmosphere: '温度：-38°C | 高速目标接近 | 视觉：扭曲',
+    desc: '你举起切割器，试图寻找声源。滴答声突然停止。<br><br>然后，你看到了它。<br><br>峡谷岩壁上的纹理开始移动。那不是岩石，而是某种与岩壁同色的生物，体长至少五米，没有眼睛，但头部有一圈环状的孔洞，正发出新的滴答声。它的翅膀像蝙蝠一样收在两侧，但皮肤是岩石的灰色。<br><br>它朝你扑来。你开枪了，切割器的高能光束击中了它的身体，但伤口瞬间愈合——它的血液是蓝色的，落地后变成了新的晶体。<br><br>它撞飞了你。你的头盔面罩出现裂痕，氧气疯狂泄漏。在昏迷前的最后一刻，你看到它张开嘴，里面没有牙齿，而是无数旋转的微型晶体，像是粉碎机。<br><br>你醒来时，发现自己躺在峡谷出口，身上覆盖着一层黏液。它...把你扔了出来？',
+    choices: [
+      { text: '检查伤势，继续前往营地', next: 'find_camp', effect: function() { consumeItem('医疗包'); GameState.health -= 60; GameState.oxygen -= 30; addLog('你奇迹般地活了下来。裂隙猎手似乎不杀失去意识的猎物。'); } }
+    ]
+  },
+  canyon_safe: {
+    title: '峡谷出口',
+    atmosphere: '温度：-35°C | 安全 | 远处有紫色光芒',
+    desc: '你蹲在地上，捂住头盔，心跳如雷。<br><br>滴答声在你头顶停了。你透过面罩的缝隙向上看，看到一个巨大的阴影从峡谷上方掠过——它没有翅膀，却像鱼一样在空气中游动，身体与岩壁摩擦发出沙沙声。<br><br>它似乎没有看到你。你保持蹲姿整整十分钟，直到确认它离开。<br><br>你站起身，发现峡谷出口处有一片紫色的光芒。那光芒稳定而柔和，不像红色植物那样脉动。<br><br>在峡谷出口的岩壁上，你发现了一个被碎石半掩的洞口——里面似乎有通道。',
+    choices: [
+      { text: '进入地下通道探索', next: 'underground_tunnel', effect: function() { addLog('你钻进了地下通道。'); advanceTime(30); } },
+      { text: '向紫色光芒前进', next: 'find_camp', effect: function() { advanceTime(60); } },
+      { text: '【拓片】用岩画上的声波图案干扰猎手', next: 'canyon_trick', effect: function() { addLog('你按照岩画上的图案，用切割器敲击岩壁发出特定频率的声音。'); }, condition: function() { return GameState.inventory.includes('古老岩画拓片'); } }
+    ]
+  },
+  canyon_trick: {
+    title: '声波干扰',
+    atmosphere: '温度：-35°C | 声波：干扰中 | 裂隙猎手：混乱',
+    desc: '你拿出古老岩画拓片，上面描绘着裂隙猎手的图案——它的头部有一圈环状孔洞，那是它的声波接收器。岩画旁边刻着一些线条，像是某种频率图谱。<br><br>你用切割器有节奏地敲击岩壁，模仿岩画上的频率。滴答声突然变得混乱——裂隙猎手似乎无法定位这种不规则的回声。<br><br>你听到头顶传来愤怒的嘶鸣，然后是翅膀拍打的声音，渐渐远去。它离开了，被你的声波干扰骗走了。<br><br>你安全地通过了峡谷，没有受到任何伤害。',
+    choices: [
+      { text: '向紫色光芒前进', next: 'find_camp', effect: function() { addLog('你安全通过了峡谷。'); advanceTime(60); } }
+    ]
+  },
+  underground_tunnel: {
+    title: '地下隧道',
+    atmosphere: '温度：-10°C | 岩壁：古老 | 有壁画',
+    desc: '隧道比想象中宽敞，岩壁上有某种古老的岩画——不是人类留下的，线条呈现出几何化的风格。<br><br>岩画描绘了一个循环：红色植物吸收阳光，蓝色晶体分解物质，紫色地衣在夜间生长，某种巨大的生物在天空中游动。所有元素之间用线条连接，形成一个闭环。<br><br>你明白了——K-774的生态系统是完整的，每一个"危险"都只是生态位的一部分。红色植物不是恶魔，它们是生产者。裂隙猎手不是怪物，它们是消费者。<br><br>在隧道的尽头，你找到了一块平整的石板，上面刻着更精细的图案。你用切割器刮下了一层拓片。<br><br>你获得了【古老岩画拓片】。<br><br>隧道尽头通向一片晶体废墟。',
+    choices: [
+      { text: '带着拓片前往晶体废墟', next: 'crystal_ruin', effect: function() { 
+        GameState.inventory.push('古老岩画拓片'); 
+        addLog('获得物品：古老岩画拓片。'); 
+        advanceTime(60); 
+      } }
+    ]
+  },
+  storm_valley: {
+    title: '风暴山谷',
+    atmosphere: '温度：-50°C | 气流：不稳定 | 能见度：低',
+    desc: '你向东走去，进入了一条山谷。这里的风很奇怪——不是从一个方向吹来，而是像呼吸一样，有节奏地涌来又退去。<br><br>山谷两侧的岩壁上布满了孔洞，风从孔洞中穿过时发出呜咽般的声音。你的宇航服传感器显示：气流温度在变化，但没有任何气象规律可循。<br><br>你注意到，当你移动时，气流的方向似乎也在改变。像是...像是某种东西在追踪你的体温。<br><br>前方的雾气中，有一个巨大的轮廓在缓缓移动。你看不清它的形状，但翼展至少十米。它是透明的，几乎与天空融为一体。<br><br>山谷左侧的岩壁上有一些凸起的岩石，似乎可以攀爬绕过山谷中央。',
+    choices: [
+      { text: '伏低身体，停止移动，等待它离开', next: 'storm_wait', effect: function() { addLog('你伏低身体。气流渐渐平息。'); } },
+      { text: '沿着岩壁攀爬，绕过山谷中央', next: 'cliff_climb', effect: function() { GameState.health -= 15; addLog('岩壁湿滑，攀爬中擦伤了手臂。'); advanceTime(60); } },
+      { text: '快速奔跑，穿过山谷', next: 'storm_chase', effect: function() { GameState.health -= 35; } }
+    ]
+  },
+  cliff_climb: {
+    title: '岩壁攀爬',
+    atmosphere: '温度：-50°C | 岩壁：湿滑 | 高度：危险',
+    desc: '你贴着岩壁，寻找可以攀爬的凸起。岩石表面覆盖着一层薄薄的冰晶，每一步都要格外小心。你的手套在攀爬中被锋利的岩片划破了几道口子。<br><br>爬到一半时，你听到了头顶传来的嗡鸣声——那个透明的巨大生物正在山谷中央盘旋，它的气流几乎把你从岩壁上吹落。你死死抓住岩石，等待它飞远。<br><br>十分钟后，你终于爬到了山谷的另一侧。这里的岩壁下有一片凹陷的岩洞，洞口生长着一些紫色的地衣。<br><br>你获得了【紫色地衣样本】。',
+    choices: [
+      { text: '进入岩洞休息', next: 'cave', effect: function() { 
+        GameState.inventory.push('紫色地衣样本'); 
+        addLog('获得物品：紫色地衣样本。'); 
+        advanceTime(60); 
+      } },
+      { text: '继续前进，前往冰冻瀑布', next: 'frozen_waterfall', effect: function() { 
+        GameState.inventory.push('紫色地衣样本'); 
+        addLog('获得物品：紫色地衣样本。'); 
+        advanceTime(60); 
+      } }
+    ]
+  },
+  storm_wait: {
+    title: '风暴平息',
+    atmosphere: '温度：-50°C | 气流：平静 | 安全',
+    desc: '你伏低身体，关闭了宇航服的所有热源。十分钟后，气流渐渐平息。你抬头望去，那个巨大的透明轮廓已经飘向了远方，像是一只巨大的水母在天空中游动。<br><br>你注意到山谷的尽头有一片紫色的地衣，它们生长在背风的岩壁下，形成了一片天然的庇护所。<br><br>你获得了【紫色地衣样本】。<br><br>远处，你看到了一个发光的山洞入口。更远处，山谷的尽头有一道巨大的冰蓝色屏障——那是一道冰冻瀑布，从百米高的岩壁上垂下。',
+    choices: [
+      { text: '前往发光山洞', next: 'cave', effect: function() { GameState.inventory.push('紫色地衣样本'); addLog('获得物品：紫色地衣样本。'); advanceTime(60); } },
+      { text: '前往冰冻瀑布', next: 'frozen_waterfall', effect: function() { GameState.inventory.push('紫色地衣样本'); addLog('获得物品：紫色地衣样本。'); advanceTime(60); } },
+      { text: '返回飞船方向', next: 'airlock', effect: function() { GameState.inventory.push('紫色地衣样本'); addLog('获得物品：紫色地衣样本。'); } }
+    ]
+  },
+  frozen_waterfall: {
+    title: '冰冻瀑布',
+    atmosphere: '温度：-65°C | 物质：未知 | 结构：晶体',
+    desc: '你走近了那道瀑布。它不是水——在-65°C的环境下，水早已冻结成冰。但这不是冰，而是一种透明的、带有轻微蓝光的晶体物质，从岩壁上缓缓流动，像是被冻结在半空中的液体。<br><br>你的地质扫描器显示：这种物质不是H2O，而是一种硅基溶剂，在极低温下呈现固态，但在你的体温接近时会开始软化。<br><br>瀑布底部堆积着无数晶体碎片，像是一堆被打碎的玻璃。你捡起了一块较大的碎片——它在你手中发出微弱的嗡鸣，然后碎裂成更小的晶体。<br><br>你获得了【透明冰晶】。<br><br>从瀑布后方，你看到了一条通往发光洞穴的捷径。',
+    choices: [
+      { text: '从瀑布后方前往发光洞穴', next: 'cave', effect: function() { 
+        GameState.inventory.push('透明冰晶'); 
+        addLog('获得物品：透明冰晶。'); 
+        advanceTime(60); 
+      } },
+      { text: '返回风暴山谷', next: 'storm_wait', effect: function() { 
+        GameState.inventory.push('透明冰晶'); 
+        addLog('获得物品：透明冰晶。'); 
+      } }
+    ]
+  },
+  storm_chase: {
+    title: '浮游捕食者',
+    atmosphere: '温度：-50°C | 气流：狂暴 | 追逐中',
+    desc: '你开始奔跑。气流立刻变得狂暴，像是有生命一样追着你。那个透明的轮廓俯冲下来，你感到一阵巨大的压力——它虽然没有实体接触你，但气流像刀刃一样切割你的宇航服。<br><br>你跌倒了，滚下山坡。宇航服的外层被撕开了数道口子，氧气开始泄漏。那个生物在你头顶盘旋，发出低沉的嗡鸣，然后缓缓升向高空，似乎对你失去了兴趣。<br><br>你躺在山谷底部，浑身是伤。但你还活着。',
+    choices: [
+      { text: '使用医疗包和氧气罐，爬出山谷', next: 'storm_wait', effect: function() { consumeItem('医疗包'); consumeItem('氧气罐'); GameState.health -= 35; GameState.oxygen -= 30; addLog('你勉强爬出了山谷。'); } }
+    ]
+  },
+  cave: {
+    title: '发光洞穴',
+    atmosphere: '温度：+5°C | 发光浓度：高 | 美丽而致命',
+    desc: '洞穴内部像是星空倒悬。墙壁上布满了发光的蓝色和金色节点，它们随着你的呼吸节奏明暗变化。<br><br>在洞穴深处，你看到了燃料晶体——高纯度的能源矿石，足以重启飞船引擎。它们散发着柔和的绿光，在黑暗中像是指引。<br><br>但你也看到了其他东西。发光节点的阴影中，有东西在蠕动。那不是动物，而是某种昆虫——腹部发出金色光芒，在空中缓缓漂浮。它们缠绕着几具尸体，宇航服上印着不同编号的探索任务标志。<br><br>这些发光体是诱饵。它们用美丽吸引猎物，然后...<br><br>但燃料晶体也在发光...',
+    choices: [
+      { text: '用黑布包裹燃料晶体，不直视光芒，快速离开', next: 'find_camp', effect: function() { GameState.inventory.push('燃料晶体'); addLog('你蒙住双眼，凭触觉取走了燃料。发光虫在身后蠕动，但没有追来。'); } },
+      { text: '直接拿走燃料晶体，欣赏这美丽的光芒', next: 'cave_trap', effect: function() { GameState.health -= 40; } }
+    ]
+  },
+  cave_trap: {
+    title: '诱饵虫群',
+    atmosphere: '温度：+5°C | 虫群：包围 | 强酸警告',
+    desc: '你伸手去拿燃料晶体。就在你触碰它的瞬间，洞穴墙壁上的所有发光节点同时熄灭。<br><br>黑暗中，你听到了振翅声。无数发光虫从阴影中涌出，它们的腹部发出刺眼的金光，像是一群星星在向你扑来。<br><br>第一只虫落在你的头盔上，喷射出强酸。面罩开始溶解。第二只、第三只...它们像雨点一样落下。<br><br>你跌跌撞撞地后退，用切割器挥舞，但虫群太多了。你勉强逃出了洞穴，但宇航服已经被腐蚀得千疮百孔。',
+    choices: [
+      { text: '拖着残破的宇航服，寻找庇护所', next: 'find_camp', effect: function() { consumeItem('医疗包'); GameState.health -= 40; GameState.oxygen -= 25; addLog('你勉强逃脱了。宇航服严重受损。'); } }
+    ]
+  },
+  night_shelter: {
+    title: '紧急庇护所',
+    atmosphere: '温度：-30°C | 背风处 | 紫色地衣覆盖',
+    desc: '天色已晚，你拼命寻找可以过夜的地方。终于，你在岩壁的背风处发现了一片紫色地衣——它们像毯子一样覆盖着凹陷的岩洞，发出微弱的荧光。<br><br>你钻进岩洞，紫色地衣释放出的氧气让你的宇航服过滤器轻松了许多。洞外，你能听到气体沉降的嘶嘶声，但背风处的空气是安全的。<br><br>你熬过了夜晚。清晨，地衣的荧光渐渐暗淡，你整理装备准备继续探索。',
+    choices: [
+      { text: '天亮了，继续探索', next: 'find_camp', effect: function() { 
+        GameState.health = Math.min(100, GameState.health + 10); 
+        GameState.oxygen = Math.min(100, GameState.oxygen + 20); 
+        addLog('你在紫色地衣的庇护下熬过了夜晚。'); 
+        GameState.time = 360; // 重置到早上6点
+        GameState.flags.nightWarned = false;
+      } }
+    ]
+  },
+  find_camp: {
+    title: '前任营地',
+    atmosphere: '温度：-30°C | 发现人造结构 | 紫色地衣覆盖',
+    desc: '你发现了前任宇航员的营地。那是用飞船残骸搭建的临时庇护所，被一层厚厚的紫色地衣覆盖着。<br><br>庇护所内部保存完好。桌上有一台还能工作的电脑，墙上贴满了手写笔记和星球地图。角落里有一具尸体——穿着宇航服，但头盔是打开的。<br><br>他的脸...他的脸上长满了蓝色的晶体，像是一张水晶面具。他的手边有一张更完整的纸条，背面写满了补充规则。<br><br>你阅读了他的笔记：<br><br>第15天：K-774有完整的生态链。红色植物是生产者，但高温时会变成捕食者。蓝色晶体是分解者网络，踩碎会释放毒素。裂隙猎手是消费者，声波定位。<br><br>第23天：我找到了避风处。紫色地衣是夜间生产者，它们吸收硫化物，释放氧气。只要待在地衣背面，就能熬过夜晚。<br><br>第30天：我看到了同伴在招手。我跟了过去。那不是我认识的任何人。那是孢子制造的幻觉。<br><br>第47天：发光洞穴里有虫。它们用光吸引人。不要看它们。<br><br>你获得了【完整笔记】。',
+    choices: [
+      { text: '在营地休息，整理补给', next: 'camp_rest', effect: function() { GameState.oxygen = 100; GameState.health = Math.min(100, GameState.health + 20); GameState.inventory.push('完整笔记'); addLog('获得物品：完整笔记。氧气补满。生命值恢复。'); GameState.flags.nightWarned = false; } }
+    ]
+  },
+  camp_rest: {
+    title: '营地 - 休整',
+    atmosphere: '温度：-30°C | 安全 | 紫色地衣释放氧气',
+    desc: '你在营地休整了一夜。紫色地衣在黑暗中发出微弱的荧光，释放出的氧气让你的宇航服过滤器轻松了许多。<br><br>清晨，你整理了所有收集到的信息和物资。你的背包里有：<br><br>- 数据核心（营地坐标）<br>- 红色孢子样本<br>- 紫色地衣样本<br>- 燃料晶体（或尚未获得）<br>- 完整笔记<br><br>地图显示，飞船残骸的方向有一片软泥沼泽，那里可能埋着引擎核心。而风之谷的方向，有一个求救信号源。<br><br>你必须做出最终选择。',
+    choices: [
+      { text: '前往软泥沼泽，寻找引擎核心', next: 'swamp', effect: function() { advanceTime(120); } },
+      { text: '前往风之谷，调查求救信号', next: 'wind_valley', effect: function() { advanceTime(120); } },
+      { text: '返回发光洞穴', next: 'cave', effect: function() { advanceTime(120); }, condition: function() { return !GameState.inventory.includes('燃料晶体'); } },
+      { text: '【隐藏】你已经理解了这个星球。建立共生。', next: 'hidden_path', effect: function() { addLog('你做出了前所未有的决定。'); }, condition: function() {
+        return GameState.inventory.includes('数据核心') && 
+               GameState.inventory.includes('红色孢子样本') && 
+               GameState.inventory.includes('紫色地衣样本') && 
+               GameState.inventory.includes('燃料晶体') && 
+               GameState.inventory.includes('完整笔记') && 
+               GameState.inventory.includes('引擎核心') &&
+               GameState.inventory.includes('古老岩画拓片') &&
+               GameState.health > 50 && GameState.oxygen > 50;
+      }}
+    ]
+  },
+  swamp: {
+    title: '软泥沼泽',
+    atmosphere: '温度：+20°C | 地面：柔软 | 酸性气体：高',
+    desc: '沼泽看起来像是普通的湿地，但地面是半透明的。你能看到脚下几米深处有东西在流动——不是水，而是某种乳白色的、充满气泡的液体。<br><br>你的宇航服探测器报警：地面pH值为2，强酸性。这不是沼泽，这是一个消化池。池底有无数白色的菌丝在蠕动，像是某种巨大的胃。<br><br>在沼泽中央，矗立着飞船的引擎核心。迫降时它脱落在这里，如果能回收它，你就有足够的能源发送求救信号。<br><br>但通往中央的路途上，地面越来越软。你每走一步，下沉的速度就加快一分。但你需要去中央...',
+    choices: [
+      { text: '脱掉靴子，用晶体碎片垫脚，快速跳跃前进', next: 'swamp_core', effect: function() { addLog('你利用晶体碎片分散重量，向沼泽中央前进。'); } },
+      { text: '穿着靴子直接走过去', next: 'swamp_trap', effect: function() { GameState.health -= 40; } }
+    ]
+  },
+  swamp_core: {
+    title: '沼泽中央',
+    atmosphere: '温度：+20°C | 地面：极软 | 引擎核心：可见',
+    desc: '你脱掉了靴子，赤脚（隔着宇航服内衬）踩在晶体碎片上。每一步都小心翼翼，但菌丝还是从碎片缝隙中钻出来，试图缠绕你的脚踝。<br><br>你终于到达了沼泽中央。引擎核心半埋在乳白色的液体中，表面已经被腐蚀了一部分，但主体结构还完整。你用切割器割断了连接管线，扛起了核心。<br><br>回程更危险。菌丝似乎被激怒了，地面开始剧烈蠕动。你拼命跳跃，在沉没前的最后一刻踏上了硬地。<br><br>你获得了【引擎核心】。',
+    choices: [
+      { text: '带着引擎核心返回营地，准备发射信号', next: 'ending_signal', effect: function() { GameState.inventory.push('引擎核心'); addLog('获得物品：引擎核心。'); } }
+    ]
+  },
+  swamp_trap: {
+    title: '下沉',
+    atmosphere: '温度：+20°C | 下沉：加速 | 腐蚀：致命',
+    desc: '你穿着沉重的靴子踏入沼泽。第一步，下沉到脚踝。第二步，下沉到膝盖。第三步，你试图挣扎，但酸性液体已经腐蚀了宇航服的密封。<br><br>你没有感到痛苦。菌丝让你感到温暖，像是回到了母体。沼泽接纳了你，分解你的有机质，将你的无机质转化为新的蓝色晶体。<br><br>一年后，沼泽边缘长出了一株新的红色植物。它比其他植物更高，更红，而且顶端偶尔会喷出氧气面罩的形状。',
+    choices: [
+      { text: '...', next: 'ending_dissolved', effect: function() { GameState.health = 0; } }
+    ]
+  },
+  wind_valley: {
+    title: '风之谷',
+    atmosphere: '温度：-60°C | 气流：强烈 | 来源：未知',
+    desc: '山谷中确实有风。不是普通的风，而是有规律的、像是呼吸般的气流。吸气时，风从山谷外涌入；呼气时，风从山谷深处喷出。<br><br>你深入山谷，在尽头看到了同伴。<br><br>它看起来和你一模一样。同样的宇航服，同样的头盔，同样的体型。它背对着你，站在一个巨大的、由蓝色晶体构成的圆环中央。<br><br>圆环有节奏地发光，而同伴缓缓转过身。它的面罩下不是人脸，而是一团红色的、类似红色植物的绒毛，正在模拟人类的五官。<br><br>它向你伸出手。风停了。<br><br>然后你听到了声音——不是通过无线电，而是直接在你的脑海中：<br><br>留下。成为养分。成为循环。<br><br>你意识到，这不是同伴。这是拟态真菌制造的幻觉。而山谷中的风...是某种巨大的东西在游动。',
+    choices: [
+      { text: '拒绝邀请，用信号发射器呼叫轨道站', next: 'ending_escape', effect: function() { addLog('你拒绝了幻觉。信号发射器开始工作。'); } },
+      { text: '接受邀请，走进晶体圆环', next: 'ending_merge', effect: function() { GameState.health = 0; } }
+    ]
+  },
+  ending_escape: {
+    title: '结局：逃离',
+    atmosphere: '游戏结束',
+    desc: 'ENDING',
+    choices: [],
+    ending: {
+      title: '逃离 K-774',
+      desc: '你带着燃料晶体和信号发射器回到了飞船。<br><br>花了三天时间修复引擎，你成功发射了求救信号。六个月后，一艘路过的采矿船接收到了信号，将你救走。<br><br>但你知道，你没有真正逃离。在返回地球的航程中，你开始听到滴答声。你的皮肤下出现了微小的蓝色斑点。你的梦境里全是紫色地衣和红色丛林。<br><br>K-774没有让你离开。它只是在等待。等待你回到地球，等待新的生态系统。等待扩张。<br><br>你成为了它的种子。<br><br>【结局：携带者】',
+      truth: [0, 1, 2, 5, 6]
+    }
+  },
+  ending_signal: {
+    title: '结局：信号',
+    atmosphere: '游戏结束',
+    desc: 'ENDING',
+    choices: [],
+    ending: {
+      title: '最后的广播',
+      desc: '你成功回收了引擎核心，并用它启动了飞船的深空通讯阵列。<br><br>你的求救信号传遍了整个星区。但你也知道，信号会被K-774的生态接收——那些晶体网络会记录一切。<br><br>信号发出的第七天，轨道站收到了你的坐标。救援船正在赶来。<br><br>但在等待的最后一个夜晚，你看到了紫色地衣开始覆盖飞船外壳。它们在保护你，还是在标记你？<br><br>当你登上救援船时，你回头看了一眼K-774。星球表面的蓝色晶体形成了一张巨大的网，正对着你微笑。<br><br>【结局：被记住的人】',
+      truth: [2, 3, 7, 5]
+    }
+  },
+  ending_dissolved: {
+    title: '结局：分解',
+    atmosphere: '游戏结束',
+    desc: 'ENDING',
+    choices: [],
+    ending: {
+      title: '回归生态',
+      desc: '你穿着沉重的靴子踏入沼泽。第一步，下沉到脚踝。第二步，下沉到膝盖。第三步，你试图挣扎，但酸性液体已经腐蚀了宇航服的密封。<br><br>你没有感到痛苦。菌丝让你感到温暖，像是回到了母体。沼泽接纳了你，分解你的有机质，将你的无机质转化为新的蓝色晶体。<br><br>一年后，沼泽边缘长出了一株新的红色植物。它比其他植物更高，更红，而且顶端偶尔会喷出氧气面罩的形状。<br><br>【结局：分解者】',
+      truth: [7]
+    }
+  },
+  ending_merge: {
+    title: '结局：融合',
+    atmosphere: '游戏结束',
+    desc: 'ENDING',
+    choices: [],
+    ending: {
+      title: '超个体',
+      desc: '你走进了晶体圆环。<br><br>没有痛苦。你的意识被孢子侵蚀，注入了真菌网络。你看到了一切：红色丛林的呼吸、裂隙猎手的巡逻、沼泽的消化、地衣的生长。<br><br>你成为了K-774生态链的一环。你的记忆、你的知识、你的人性，都成为了这个生态系统的养分。<br><br>有时，当有新的宇航员降落时，你会通过拟态真菌的身体向他们招手。你会写下规则，试图帮助他们理解。<br><br>但他们很少理解。他们大多成为了养分。<br><br>而你，将永远活着。作为生态系统的一部分。作为K-774的又一个循环。<br><br>【结局：永恒】',
+      truth: [4, 8, 1, 3]
+    }
+  },
+  hidden_path: {
+    title: '生态的呼唤',
+    atmosphere: '温度：-30°C | 紫色地衣：共鸣 | 异常平静',
+    desc: '你在营地中整理物资时，紫色地衣突然开始同步发光。它们的荧光从微弱的呼吸变成了稳定的脉动，像是在...像是在试图与你交流。<br><br>你回想起收集的一切：红色孢子的结构、蓝色晶体的网络、裂隙猎手的声波、发光虫的诱饵、沼泽的消化液、地衣的固硫机制。你突然明白了——K-774不是一颗死星，它是一个完整的生态系统，只是它的规则与人类完全不同。<br><br>那些"捕食者"不是恶意，只是生态位的执行者。那些"陷阱"不是阴谋，只是生存策略。<br><br>你做出了一个前所未有的决定：不逃离，不融合，而是建立共生。<br><br>你用燃料晶体搭建了一个稳定的能源站，用紫色地衣构建了一个氧气循环系统，用蓝色晶体的网络作为警报系统。你成为了这个星球上第一个"生态调和者"。<br><br>你在庇护所门口写下新的规则——不是给人类的警告，而是给K-774的问候：<br><br>"我来了。我不破坏。我观察。我记录。我等待。"<br><br>紫色地衣覆盖了庇护所的屋顶。裂隙猎手从峡谷上方经过，但没有俯冲。红色丛林在远处盛开，但你和它之间有了安全的距离。<br><br>你活了下来。不是作为征服者，不是作为逃亡者，而是作为桥梁。<br><br>十年后，新的探索者降落了。他们捡到了你写的纸条。上面只有一句话：<br><br>"规则是果，生态是因。理解它，然后与它共存。——林德，及后来者"',
+    choices: [],
+    ending: {
+      title: '共生者',
+      desc: '你成为了K-774上第一个与生态系统建立共生关系的人类。<br><br>你没有试图征服这颗星球，也没有被它吞噬。你理解了它的规则，尊重了它的边界，找到了共存的可能。<br><br>你的庇护所成为了后来者的灯塔。你的笔记成为了新的生存指南。你证明了人类不仅可以适应环境，还可以与环境达成和解。<br><br>K-774接纳了你。不是作为养分，不是作为入侵者，而是作为生态系统的一个新成员。<br><br>【隐藏结局：共生者】<br><br>解锁条件：收集全部关键物品（数据核心、红色孢子样本、紫色地衣样本、燃料晶体、完整笔记、引擎核心、古老岩画拓片），并在营地休整时选择"建立共生"。',
+      truth: [0, 1, 2, 3, 4, 5, 6, 7, 8]
+    }
+  }
+};
+
+function initGame() {
+  try {
+    GameState.oxygen = 100; GameState.health = 100; GameState.time = 360; GameState.day = 1;
+    GameState.temperature = -40; GameState.inventory = []; GameState.flags = {};
+    GameState.rulesUnlocked = [false, false, false, false, false, false, false, false, false];
+    GameState.currentScene = 'awakening'; GameState.gameOver = false; GameState.discoveredTruth = [];
+    var es = document.getElementById('endingScreen'); if (es) es.classList.remove('active');
+    var la = document.getElementById('logArea'); if (la) la.classList.remove('active');
+    var ca = document.getElementById('choicesArea'); if (ca) ca.innerHTML = '';
+    var sb = document.getElementById('startBtn'); if (sb) sb.style.display = 'none';
+    var truth = document.getElementById('endingTruth'); if (truth) truth.innerHTML = '';
+    updateStatus(); renderScene('awakening'); updateRulesDisplay(); updateBackpack();
+  } catch (e) {
+    console.error('Init error:', e);
+    var desc = document.getElementById('sceneDesc');
+    if (desc) desc.innerHTML = '初始化错误：' + e.message + '<br>请尝试点击上方按钮或刷新页面。';
+  }
+}
+
+// 注册Service Worker（PWA支持）
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('sw.js')
+      .then(function(registration) {
+        console.log('ServiceWorker 注册成功: ', registration.scope);
+      })
+      .catch(function(err) {
+        console.log('ServiceWorker 注册失败: ', err);
+      });
+  });
+}
+
+function useItem(itemName) {
+  var effect = ITEM_EFFECTS[itemName];
+  if (!effect) { addLog(itemName + ' 无法直接使用。'); return; }
+  var idx = GameState.inventory.indexOf(itemName);
+  if (idx === -1) return;
+  // 满状态检查
+  if (itemName === '医疗包' && GameState.health >= 100) {
+    addLog('生命值已满，无需使用医疗包。'); return;
+  }
+  if (itemName === '氧气罐' && GameState.oxygen >= 100) {
+    addLog('氧气已满，无需更换氧气罐。'); return;
+  }
+  if (itemName === '应急补给' && GameState.health >= 100 && GameState.oxygen >= 100) {
+    addLog('状态良好，无需补给。'); return;
+  }
+  GameState.inventory.splice(idx, 1);
+  GameState.health = Math.min(100, GameState.health + effect.hp);
+  GameState.oxygen = Math.min(100, GameState.oxygen + effect.o2);
+  var logArea = document.getElementById('logArea');
+  var logTitle = document.getElementById('logTitle');
+  if (logArea) { logArea.classList.remove('success'); logArea.classList.add('active'); }
+  if (logTitle) logTitle.textContent = '物品使用';
+  var logContent = document.getElementById('logContent');
+  if (logContent) logContent.textContent = effect.msg + (effect.hp > 0 ? ' HP+' + effect.hp : '') + (effect.o2 > 0 ? ' O2+' + effect.o2 : '');
+  setTimeout(function() { if (logArea) logArea.classList.remove('active'); }, 4000);
+  updateStatus(); updateBackpack();
+}
+
+function consumeItem(itemName) {
+  var idx = GameState.inventory.indexOf(itemName);
+  if (idx !== -1) { GameState.inventory.splice(idx, 1); addLog('消耗了 ' + itemName); updateBackpack(); }
+}
+
+var QUEST_ITEMS = ['规则纸条', '数据核心', '红色孢子样本', '紫色地衣样本', '燃料晶体', '完整笔记', '引擎核心', '切割器', '信号发射器', '数据平板', '金属样本罐', '发光虫尸体', '荆棘刺', '望远镜', '备用电池', '古老岩画拓片', '透明冰晶'];
+var HEAL_ITEMS = ['医疗包', '氧气罐', '应急补给'];
+
+function updateBackpack() {
+  var questBar = document.getElementById('questBackpackBar');
+  var questEmpty = document.getElementById('questBackpackEmpty');
+  var healBar = document.getElementById('healBackpackBar');
+  var healEmpty = document.getElementById('healBackpackEmpty');
+  
+  // 清空任务背包
+  if (questBar) {
+    var qItems = questBar.querySelectorAll('.backpack-item');
+    for (var i = 0; i < qItems.length; i++) qItems[i].remove();
+  }
+  // 清空恢复背包
+  if (healBar) {
+    var hItems = healBar.querySelectorAll('.backpack-item');
+    for (var i = 0; i < hItems.length; i++) hItems[i].remove();
+  }
+  
+  var questCount = 0, healCount = 0;
+  for (var j = 0; j < GameState.inventory.length; j++) {
+    var item = GameState.inventory[j];
+    var div = document.createElement('div'); div.className = 'backpack-item';
+    var icon = ITEM_ICONS[item] || '◈';
+    div.innerHTML = '<span class="item-icon">' + icon + '</span>' + item;
+    
+    if (HEAL_ITEMS.indexOf(item) !== -1) {
+      // 恢复物品
+      if (ITEM_EFFECTS[item]) div.onclick = (function(name) { return function() { useItem(name); }; })(item);
+      if (healBar) healBar.appendChild(div);
+      healCount++;
+    } else {
+      // 任务物品（不可点击使用）
+      if (questBar) questBar.appendChild(div);
+      questCount++;
+    }
+  }
+  
+  if (questEmpty) questEmpty.style.display = questCount === 0 ? 'inline' : 'none';
+  if (healEmpty) healEmpty.style.display = healCount === 0 ? 'inline' : 'none';
+}
+
+function advanceTime(minutes) {
+  GameState.time += minutes;
+  if (GameState.time >= 1440) { GameState.time -= 1440; GameState.day++; GameState.flags.sunsetWarning = false; }
+  var hour = Math.floor(GameState.time / 60);
+  if (hour >= 18 && !GameState.flags.sunsetWarning) {
+    GameState.flags.sunsetWarning = true;
+    if (GameState.currentScene !== 'find_camp' && GameState.currentScene !== 'camp_rest' && GameState.currentScene !== 'red_jungle' && GameState.currentScene !== 'night_shelter') {
+      addLog('太阳正在落下。天黑之前必须找到庇护所。');
+      var md = document.getElementById('mainDisplay');
+      if (md) { md.classList.add('warning-flash'); setTimeout(function() { md.classList.remove('warning-flash'); }, 5000); }
+    }
+  }
+  // 夜间有毒气体沉降 - 只有在有紫色地衣样本且处于安全场景时才免疫
+  var safeScenes = ['find_camp', 'camp_rest', 'night_shelter', 'underground_tunnel'];
+  var isSafe = safeScenes.indexOf(GameState.currentScene) !== -1;
+  var hasMoss = GameState.inventory.includes('紫色地衣样本');
+  if ((hour >= 20 || hour < 6) && !isSafe) {
+    if (hasMoss && GameState.currentScene !== 'red_jungle' && GameState.currentScene !== 'red_jungle_deep') {
+      // 有地衣样本但不在安全场景，伤害减半
+      GameState.health -= 3; GameState.oxygen -= 3; 
+      if (!GameState.flags.nightWarned) { GameState.flags.nightWarned = true; addLog('夜间有毒气体沉降。紫色地衣样本提供了部分保护，但你仍需找到背风处。'); }
+    } else {
+      // 没有保护，全额伤害
+      GameState.health -= 8; GameState.oxygen -= 8; 
+      if (!GameState.flags.nightWarned) { GameState.flags.nightWarned = true; addLog('夜间有毒气体沉降！没有紫色地衣的保护，毒素直接侵蚀你的呼吸系统。'); }
+    }
+  }
+  updateStatus();
+}
+
+function updateStatus() {
+  var o = document.getElementById('oxygen'); if (o) o.textContent = GameState.oxygen + '%';
+  var h = document.getElementById('health'); if (h) h.textContent = GameState.health + '%';
+  var hour = Math.floor(GameState.time / 60); var minute = GameState.time % 60;
+  var t = document.getElementById('time'); if (t) t.textContent = 'DAY ' + GameState.day + ' - ' + (hour < 10 ? '0' : '') + hour + ':' + (minute < 10 ? '0' : '') + minute;
+  var temp = -40;
+  if (GameState.currentScene === 'red_jungle' || GameState.currentScene === 'red_jungle_deep') temp = -15;
+  if (GameState.currentScene === 'crystal_plain' || GameState.currentScene === 'crystal_ruin' || GameState.currentScene === 'crystal_awakening') temp = -55;
+  if (GameState.currentScene === 'geothermal_trap' || GameState.currentScene === 'outpost_basement') temp = 20;
+  if (GameState.currentScene === 'cave' || GameState.currentScene === 'cave_trap') temp = 5;
+  if (GameState.currentScene === 'wind_valley') temp = -60;
+  if (GameState.currentScene === 'storm_valley' || GameState.currentScene === 'storm_wait' || GameState.currentScene === 'storm_chase') temp = -50;
+  if (GameState.currentScene === 'swamp' || GameState.currentScene === 'swamp_core' || GameState.currentScene === 'swamp_trap') temp = 20;
+  if (GameState.currentScene === 'acid_lake' || GameState.currentScene === 'acid_death') temp = -35;
+  if (GameState.currentScene === 'fungal_forest' || GameState.currentScene === 'fungal_trap') temp = -20;
+  if (GameState.currentScene === 'observation_deck') temp = 15;
+  if (GameState.currentScene === 'engine_room') temp = 35;
+  if (GameState.currentScene === 'engine_overheat') temp = 70;
+  if (GameState.currentScene === 'spore_meadow' || GameState.currentScene === 'spore_infection') temp = -25;
+  if (GameState.currentScene === 'underground_tunnel') temp = -10;
+  if (GameState.currentScene === 'frozen_waterfall') temp = -65;
+  var tp = document.getElementById('temp'); if (tp) tp.textContent = temp + '°C';
+  if (GameState.oxygen <= 0 || GameState.health <= 0) {
+    if (!GameState.gameOver) { GameState.gameOver = true; setTimeout(function() { showEnding('death'); }, 500); }
+  }
+}
+
+function renderScene(sceneId) {
+  var scene = SCENES[sceneId];
+  if (!scene) { console.error('Scene not found:', sceneId); return; }
+  GameState.currentScene = sceneId;
+  var titleEl = document.getElementById('sceneTitle'); if (titleEl) titleEl.textContent = scene.title;
+  var atmosEl = document.getElementById('atmosphere'); if (atmosEl) atmosEl.textContent = scene.atmosphere;
+  var descEl = document.getElementById('sceneDesc'); if (descEl) descEl.innerHTML = highlightText(scene.desc);
+  var choicesEl = document.getElementById('choicesArea');
+  if (choicesEl) {
+    choicesEl.innerHTML = '';
+    if (scene.ending) { setTimeout(function() { showEnding(sceneId); }, 1000); return; }
+    for (var j = 0; j < scene.choices.length; j++) {
+      (function(choice) {
+        if (choice.condition && !choice.condition()) return;
+        var btn = document.createElement('button'); btn.className = 'choice-btn';
+        btn.appendChild(document.createTextNode(choice.text));
+        btn.onclick = function() { if (choice.effect) choice.effect(); if (choice.next) renderScene(choice.next); };
+        choicesEl.appendChild(btn);
+      })(scene.choices[j]);
+    }
+  }
+  updateStatus(); updateBackpack();
+}
+
+function highlightText(text) {
+  return text
+    .replace(/红色/g, '<span class="highlight-red">红色</span>')
+    .replace(/蓝色/g, '<span class="highlight-blue">蓝色</span>')
+    .replace(/紫色/g, '<span class="highlight-purple">紫色</span>')
+    .replace(/绿色/g, '<span class="highlight-green">绿色</span>')
+    .replace(/发光/g, '<span class="highlight-amber">发光</span>')
+    .replace(/温暖/g, '<span class="highlight-red">温暖</span>')
+    .replace(/寒冷/g, '<span class="highlight-blue">寒冷</span>')
+    .replace(/同伴/g, '<span class="highlight-purple">同伴</span>')
+    .replace(/风/g, '<span class="highlight-green">风</span>');
+}
+
+function addLog(text) {
+  var logArea = document.getElementById('logArea');
+  var logContent = document.getElementById('logContent');
+  var logTitle = document.getElementById('logTitle');
+  if (logArea) { logArea.classList.remove('success'); logArea.classList.add('active'); }
+  if (logTitle) logTitle.textContent = '警告';
+  if (logContent) logContent.textContent = text;
+  setTimeout(function() { if (logArea) logArea.classList.remove('active'); }, 5000);
+}
+
+function unlockRule(index) {
+  if (!GameState.rulesUnlocked[index]) {
+    GameState.rulesUnlocked[index] = true; updateRulesDisplay();
+    var btn = document.getElementById('btnRules');
+    if (btn) { btn.classList.add('active'); setTimeout(function() { btn.classList.remove('active'); }, 1000); }
+    addLog('新规则解锁：规则 ' + (index + 1));
+  }
+}
+
+function updateRulesDisplay() {
+  var list = document.getElementById('rulesList'); if (!list) return;
+  list.innerHTML = '';
+  for (var i = 0; i < RULES.length; i++) {
+    var div = document.createElement('div');
+    div.className = 'rule-item ' + (GameState.rulesUnlocked[i] ? 'unlocked' : 'locked');
+    if (GameState.rulesUnlocked[i]) {
+      div.innerHTML = '<span class="rule-number">规则 ' + (i + 1) + '：</span>' + RULES[i].text;
+    } else {
+      div.innerHTML = '<span class="rule-number">规则 ' + (i + 1) + '：</span>████████████（油污覆盖，无法辨认）';
+    }
+    list.appendChild(div);
+  }
+}
+
+function toggleRules() {
+  var modal = document.getElementById('rulesModal'); if (modal) modal.classList.toggle('active');
+}
+
+function showEnding(sceneId) {
+  var scene = SCENES[sceneId];
+  var titleEl = document.getElementById('endingTitle');
+  var descEl = document.getElementById('endingDesc');
+  var truthEl = document.getElementById('endingTruth');
+  var screen = document.getElementById('endingScreen');
+  if (!scene || !scene.ending) {
+    if (titleEl) { titleEl.textContent = '任务失败'; titleEl.style.color = 'var(--accent-red)'; }
+    if (descEl) descEl.textContent = '你的氧气耗尽，或伤势过重。K-774接纳了你，就像它接纳了所有前任一样。你的宇航服将成为新的生态位，你的故事将成为下一个宇航员捡到的纸条。';
+    if (truthEl) truthEl.innerHTML = '';
+  } else {
+    if (titleEl) { titleEl.textContent = scene.ending.title; titleEl.style.color = sceneId === 'ending_merge' ? 'var(--accent-purple)' : sceneId === 'ending_escape' ? 'var(--accent-blue)' : sceneId === 'hidden_path' ? 'var(--accent-green)' : 'var(--accent-red)'; }
+    if (descEl) descEl.innerHTML = highlightText(scene.ending.desc);
+    if (truthEl && scene.ending.truth) {
+      var truthHtml = '<div style="color:var(--accent-purple);font-weight:bold;margin-bottom:8px;">【本次探索揭示的真相】</div>';
+      for (var i = 0; i < scene.ending.truth.length; i++) truthHtml += '<div style="margin-bottom:8px;">' + TRUTHS[scene.ending.truth[i]] + '</div>';
+      truthEl.innerHTML = truthHtml;
+    }
+  }
+  if (screen) screen.classList.add('active');
+}
+
+function restartGame() { initGame(); }
+initGame();
+</script>
+</body>
+</html>
