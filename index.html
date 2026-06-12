@@ -270,7 +270,8 @@ var ITEM_ICONS = {
   '规则纸条': '📜', '红色孢子样本': '🔴', '数据核心': '💾', '完整笔记': '📓',
   '燃料晶体': '💎', '引擎核心': '⚙️', '信号发射器': '📡', '切割器': '🔪',
   '金属样本罐': '🧪', '紫色地衣样本': '🟣', '发光虫尸体': '🪲', '荆棘刺': '🌵',
-  '望远镜': '🔭', '备用电池': '🔋', '古老岩画拓片': '🗿', '透明冰晶': '❄️'
+  '望远镜': '🔭', '备用电池': '🔋', '古老岩画拓片': '🗿', '透明冰晶': '❄️',
+  '脉冲步枪': '🔫', '营地情报': '📋'
 };
 
 var ITEM_EFFECTS = {
@@ -572,9 +573,18 @@ var SCENES = {
   canyon_trick: {
     title: '声波干扰',
     atmosphere: '温度：-35°C | 声波：干扰中 | 裂隙猎手：混乱',
-    desc: '你拿出古老岩画拓片，上面描绘着裂隙猎手的图案——它的头部有一圈环状孔洞，那是它的声波接收器。岩画旁边刻着一些线条，像是某种频率图谱。<br><br>你用切割器有节奏地敲击岩壁，模仿岩画上的频率。滴答声突然变得混乱——裂隙猎手似乎无法定位这种不规则的回声。<br><br>你听到头顶传来愤怒的嘶鸣，然后是翅膀拍打的声音，渐渐远去。它离开了，被你的声波干扰骗走了。<br><br>你安全地通过了峡谷，没有受到任何伤害。',
+    desc: '你拿出古老岩画拓片，上面描绘着裂隙猎手的图案——它的头部有一圈环状孔洞，那是它的声波接收器。岩画旁边刻着一些线条，像是某种频率图谱。<br><br>你用切割器有节奏地敲击岩壁，模仿岩画上的频率。滴答声突然变得混乱——裂隙猎手似乎无法定位这种不规则的回声。<br><br>你听到头顶传来愤怒的嘶鸣，然后是翅膀拍打的声音，渐渐远去。它离开了，被你的声波干扰骗走了。<br><br>你安全地通过了峡谷，没有受到任何伤害。猎手被赶走了，附近暂时安全。',
     choices: [
-      { text: '向紫色光芒前进', next: 'find_camp', effect: function() { addLog('你安全通过了峡谷。'); advanceTime(60); } }
+      { text: '向紫色光芒前进', next: 'find_camp', effect: function() { addLog('你安全通过了峡谷。'); advanceTime(60); } },
+      { text: '仔细探索峡谷出口（猎手已被赶走）', next: 'canyon_explore', effect: function() { addLog('你决定趁安全时仔细搜索峡谷出口。'); advanceTime(30); } }
+    ]
+  },
+  canyon_explore: {
+    title: '峡谷出口 - 仔细搜索',
+    atmosphere: '温度：-35°C | 安全 | 岩壁缝隙：异常',
+    desc: '猎手被赶走后，峡谷出口显得格外安静。你贴着岩壁，检查每一处缝隙和凹陷。<br><br>在一处被碎石半掩的岩壁缝隙中，你发现了一个金属储物格——不大，但密封良好。你撬开它，里面有一页半破损的日志纸，字迹潦草：<br><br>"如果你看到这张纸，说明你还活着。营地...有武器...脉冲步枪藏在地板下...林德留下的。对付它们有用。"<br><br>你获得了【营地情报】。',
+    choices: [
+      { text: '向紫色光芒前进', next: 'find_camp', effect: function() { GameState.inventory.push('营地情报'); addLog('获得物品：营地情报。'); GameState.flags.canyonExplored = true; advanceTime(30); } }
     ]
   },
   underground_tunnel: {
@@ -686,7 +696,16 @@ var SCENES = {
     atmosphere: '温度：-30°C | 发现人造结构 | 紫色地衣覆盖',
     desc: '你发现了前任宇航员的营地。那是用飞船残骸搭建的临时庇护所，被一层厚厚的紫色地衣覆盖着。<br><br>庇护所内部保存完好。桌上有一台还能工作的电脑，墙上贴满了手写笔记和星球地图。角落里有一具尸体——穿着宇航服，但头盔是打开的。<br><br>他的脸...他的脸上长满了蓝色的晶体，像是一张水晶面具。他的手边有一张更完整的纸条，背面写满了补充规则。<br><br>你阅读了他的笔记：<br><br>第15天：K-774有完整的生态链。红色植物是生产者，但高温时会变成捕食者。蓝色晶体是分解者网络，踩碎会释放毒素。裂隙猎手是消费者，声波定位。<br><br>第23天：我找到了避风处。紫色地衣是夜间生产者，它们吸收硫化物，释放氧气。只要待在地衣背面，就能熬过夜晚。<br><br>第30天：我看到了同伴在招手。我跟了过去。那不是我认识的任何人。那是孢子制造的幻觉。<br><br>第47天：发光洞穴里有虫。它们用光吸引人。不要看它们。<br><br>你获得了【完整笔记】。',
     choices: [
-      { text: '在营地休息，整理补给', next: 'camp_rest', effect: function() { GameState.oxygen = 100; GameState.health = Math.min(100, GameState.health + 20); GameState.inventory.push('完整笔记'); addLog('获得物品：完整笔记。氧气补满。生命值恢复。'); GameState.flags.nightWarned = false; } }
+      { text: '在营地休息，整理补给', next: 'camp_rest', effect: function() { GameState.oxygen = 100; GameState.health = Math.min(100, GameState.health + 20); GameState.inventory.push('完整笔记'); addLog('获得物品：完整笔记。氧气补满。生命值恢复。'); GameState.flags.nightWarned = false; } },
+      { text: '【情报】仔细搜索营地（林德提到的武器）', next: 'camp_search', effect: function() { addLog('你按照日志的提示搜索营地。'); }, condition: function() { return GameState.inventory.includes('营地情报'); } }
+    ]
+  },
+  camp_search: {
+    title: '营地搜索',
+    atmosphere: '温度：-30°C | 搜索中 | 地板下：金属箱',
+    desc: '你按照日志的提示，撬开了庇护所地板下的密封金属箱。箱子里躺着一把【脉冲步枪】，能量显示还有70%，枪身有深空探索者号的标志。<br><br>旁边有一张字条："对付大型生物用，瞄准热源。——林德"<br><br>你获得了【脉冲步枪】。',
+    choices: [
+      { text: '拿起武器，在营地休息', next: 'camp_rest', effect: function() { GameState.inventory.push('脉冲步枪'); GameState.oxygen = 100; GameState.health = Math.min(100, GameState.health + 20); GameState.inventory.push('完整笔记'); addLog('获得物品：脉冲步枪、完整笔记。氧气补满。生命值恢复。'); GameState.flags.nightWarned = false; } }
     ]
   },
   camp_rest: {
@@ -697,15 +716,13 @@ var SCENES = {
       { text: '前往软泥沼泽，寻找引擎核心', next: 'swamp', effect: function() { advanceTime(120); } },
       { text: '前往风之谷，调查求救信号', next: 'wind_valley', effect: function() { advanceTime(120); } },
       { text: '返回发光洞穴', next: 'cave', effect: function() { advanceTime(120); }, condition: function() { return !GameState.inventory.includes('燃料晶体'); } },
+      { text: '返回飞船，化验收集的样本', next: 'ship_lab', effect: function() { addLog('你返回飞船，准备化验样本。'); advanceTime(60); }, condition: function() { return GameState.inventory.includes('红色孢子样本') && GameState.inventory.includes('紫色地衣样本'); } },
       { text: '【隐藏】你已经理解了这个星球。建立共生。', next: 'hidden_path', effect: function() { addLog('你做出了前所未有的决定。'); }, condition: function() {
-        return GameState.inventory.includes('数据核心') && 
-               GameState.inventory.includes('红色孢子样本') && 
+        return GameState.inventory.includes('红色孢子样本') && 
                GameState.inventory.includes('紫色地衣样本') && 
                GameState.inventory.includes('燃料晶体') && 
-               GameState.inventory.includes('完整笔记') && 
-               GameState.inventory.includes('引擎核心') &&
-               GameState.inventory.includes('古老岩画拓片') &&
-               GameState.health > 50 && GameState.oxygen > 50;
+               GameState.inventory.includes('完整笔记') &&
+               GameState.health > 30 && GameState.oxygen > 30;
       }}
     ]
   },
@@ -723,7 +740,7 @@ var SCENES = {
     atmosphere: '温度：+20°C | 地面：极软 | 引擎核心：可见',
     desc: '你脱掉了靴子，赤脚（隔着宇航服内衬）踩在晶体碎片上。每一步都小心翼翼，但菌丝还是从碎片缝隙中钻出来，试图缠绕你的脚踝。<br><br>你终于到达了沼泽中央。引擎核心半埋在乳白色的液体中，表面已经被腐蚀了一部分，但主体结构还完整。你用切割器割断了连接管线，扛起了核心。<br><br>回程更危险。菌丝似乎被激怒了，地面开始剧烈蠕动。你拼命跳跃，在沉没前的最后一刻踏上了硬地。<br><br>你获得了【引擎核心】。',
     choices: [
-      { text: '带着引擎核心返回营地，准备发射信号', next: 'ending_signal', effect: function() { GameState.inventory.push('引擎核心'); addLog('获得物品：引擎核心。'); } }
+      { text: '带着引擎核心返回飞船', next: 'ship_return', effect: function() { GameState.inventory.push('引擎核心'); addLog('获得物品：引擎核心。'); } }
     ]
   },
   swamp_trap: {
@@ -774,6 +791,82 @@ var SCENES = {
       title: '回归生态',
       desc: '你穿着沉重的靴子踏入沼泽。第一步，下沉到脚踝。第二步，下沉到膝盖。第三步，你试图挣扎，但酸性液体已经腐蚀了宇航服的密封。<br><br>你没有感到痛苦。菌丝让你感到温暖，像是回到了母体。沼泽接纳了你，分解你的有机质，将你的无机质转化为新的蓝色晶体。<br><br>一年后，沼泽边缘长出了一株新的红色植物。它比其他植物更高，更红，而且顶端偶尔会喷出氧气面罩的形状。<br><br>【结局：分解者】',
       truth: [7]
+    }
+  },
+  ship_return: {
+    title: '飞船 - 引擎核心回收',
+    atmosphere: '温度：18°C | 引擎核心：已回收 | 系统：可修复',
+    desc: '你带着引擎核心回到了飞船。花了几个小时，你将核心重新安装到引擎舱中。系统自检通过——飞船的通讯阵列和生命维持系统可以重新启动。<br><br>你现在有几个选择。',
+    choices: [
+      { text: '启动深空通讯阵列，发送求救信号', next: 'ending_signal', effect: function() { addLog('通讯阵列启动。'); } },
+      { text: '前往其他地方继续探索', next: 'airlock', effect: function() { addLog('你决定继续探索。'); } },
+      { text: '化验收集的样本', next: 'ship_lab', effect: function() { addLog('你前往化验舱。'); advanceTime(60); }, condition: function() { return GameState.inventory.includes('红色孢子样本') && GameState.inventory.includes('紫色地衣样本'); } }
+    ]
+  },
+  ship_lab: {
+    title: '飞船化验舱',
+    atmosphere: '温度：18°C | 设备：可用 | 样本：分析中',
+    desc: '你回到飞船的化验舱，将红色孢子样本和紫色地衣样本放入分析仪。仪器开始运转，数据在屏幕上滚动。<br><br>分析结果令人震惊：红色孢子和紫色地衣不是独立的物种——它们共享相同的基因片段。红色孢子负责白天的氧气生产，紫色地衣负责夜间的固硫作用。它们是同一生态链的两面。<br><br>更惊人的发现：这两种植物的DNA中都含有某种未知的硅基编码，与蓝色晶体的结构高度相似。这意味着整个星球的生态系统是一个统一的有机体。<br><br>当你还在消化这些信息时，飞船的震动传感器突然报警。有什么东西正在接近飞船——体型巨大，热信号强烈，而且...速度很快。<br><br>你透过观察窗看到了它：一只从未见过的异星生物，身高至少三米，浑身覆盖着黑色的甲壳，头部有六只红色的复眼。它正在用前肢敲打飞船外壳，发出刺耳的金属摩擦声。<br><br>它发现了你。',
+    choices: [
+      { text: '拿起武器，准备战斗', next: 'alien_encounter', effect: function() { addLog('异星生物撞破了舱门！'); } },
+      { text: '躲进储物柜，屏住呼吸', next: 'alien_hide', effect: function() { addLog('你躲进了储物柜。'); } }
+    ]
+  },
+  alien_encounter: {
+    title: '异星生物遭遇战',
+    atmosphere: '温度：-10°C | 生物：hostile | 飞船：破损',
+    desc: '异星生物撞破了飞船的气闸门，黑色的甲壳在走廊灯光下泛着油光。六只红色复眼同时转向你的方向，它发出一声高频尖啸——像是金属撕裂的声音。<br><br>它朝你扑来。你没有时间思考。',
+    choices: [
+      { text: '【武器】使用脉冲步枪射击', next: 'alien_dead', effect: function() { addLog('你举起脉冲步枪，瞄准异星生物的复眼。'); }, condition: function() { return GameState.inventory.includes('脉冲步枪'); } },
+      { text: '用切割器抵抗', next: 'alien_kill_player', effect: function() { GameState.health -= 80; addLog('切割器的高能光束击中甲壳，但只留下了焦痕。'); } },
+      { text: '转身逃跑', next: 'alien_kill_player', effect: function() { GameState.health -= 60; addLog('你试图逃跑，但异星生物的速度太快了。'); } }
+    ]
+  },
+  alien_hide: {
+    title: '躲藏',
+    atmosphere: '温度：18°C | 储物柜内 | 心跳：剧烈',
+    desc: '你蜷缩在狭小的储物柜中，透过通风口缝隙观察外面的情况。异星生物在走廊里徘徊，六只复眼扫描着每一个角落。它用前肢撕开储物柜的金属门——不是这个，是隔壁的。<br><br>你听到了咀嚼声。它找到了别的东西——可能是你储存的食物样本。<br><br>十分钟后，声音渐渐远去。你小心翼翼地从储物柜中爬出来，发现走廊里满是黏液和抓痕。你活下来了，但飞船已经受损严重。<br><br>你决定去追踪那只异星生物，看看它从哪里来。',
+    choices: [
+      { text: '追踪异星生物的踪迹', next: 'alien_nest', effect: function() { addLog('你沿着黏液痕迹追踪。'); advanceTime(120); } }
+    ]
+  },
+  alien_dead: {
+    title: '胜利',
+    atmosphere: '温度：-10°C | 异星生物：死亡 | 飞船：严重破损',
+    desc: '脉冲步枪的能量束击中异星生物的复眼，它发出一声痛苦的尖啸，黑色的甲壳开始龟裂。第二枪、第三枪...它倒下了，六只复眼逐一熄灭。<br><br>你喘着粗气，看着这具巨大的尸体。它的血液不是红色的，也不是蓝色的——是紫色的，和地衣的颜色一样。它的甲壳缝隙中，生长着微小的红色孢子。<br><br>这不是一个独立的捕食者。它是生态系统的一部分——一个移动的培养皿，承载着孢子、地衣和晶体。<br><br>你决定追踪它的来路，找到它的巢穴。',
+    choices: [
+      { text: '追踪异星生物的来路', next: 'alien_nest', effect: function() { addLog('你沿着紫色血迹追踪。'); advanceTime(120); } }
+    ]
+  },
+  alien_kill_player: {
+    title: '生态的终结',
+    atmosphere: '温度：-10°C | 生命体征：消失',
+    desc: '异星生物的前肢穿透了你的宇航服。你没有感到痛苦——它的唾液中含有某种麻醉成分。<br><br>你倒在地上，看着六只红色复眼俯视着你。它开始进食。但你不是被消化的——你的身体被它甲壳中的孢子侵入，成为了生态系统的一部分。<br><br>三个月后，一只新的异星生物从飞船的废墟中走出。它的甲壳上有你的宇航服编号。<br><br>【结局：生态循环】',
+    choices: [],
+    ending: {
+      title: '生态循环',
+      desc: '异星生物的前肢穿透了你的宇航服。你没有感到痛苦——它的唾液中含有某种麻醉成分。<br><br>你倒在地上，看着六只红色复眼俯视着你。它开始进食。但你不是被消化的——你的身体被它甲壳中的孢子侵入，成为了生态系统的一部分。<br><br>三个月后，一只新的异星生物从飞船的废墟中走出。它的甲壳上有你的宇航服编号。<br><br>【结局：生态循环】',
+      truth: [0, 4, 6]
+    }
+  },
+  alien_nest: {
+    title: '巢穴核心',
+    atmosphere: '温度：+15°C | 生物密度：极高 | 氧气：异常充足',
+    desc: '你追踪到了异星生物的巢穴——一个巨大的地下空洞，洞壁上覆盖着所有三种生物的混合物：红色植物、蓝色晶体、紫色地衣。它们在这里共生，形成了一个完美的生态闭环。<br><br>在洞穴中央，有一个巨大的、脉动的核心——不是生物，也不是矿物，而是某种介于两者之间的存在。它散发着温暖的光芒，氧气浓度达到了惊人的15%。<br><br>你突然明白了：K-774不是一颗有生命的星球——它本身就是生命。那些"危险"不是威胁，而是免疫系统。你，作为一个外来者，已经被观察了足够久。<br><br>核心向你发出了邀请——不是通过声音，而是通过孢子，直接在你的大脑中形成图像。<br><br>你可以离开，带着知识。或者，你可以留下，成为它的一部分。',
+    choices: [
+      { text: '记录数据，返回地球', next: 'ending_knowledge', effect: function() { addLog('你记录了一切。'); } },
+      { text: '触摸核心，与K-774融合', next: 'hidden_path', effect: function() { addLog('你触碰了核心。'); } }
+    ]
+  },
+  ending_knowledge: {
+    title: '结局：启示',
+    atmosphere: '游戏结束',
+    desc: 'ENDING',
+    choices: [],
+    ending: {
+      title: '带回知识的人',
+      desc: '你记录了一切，带着关于K-774生态系统的完整数据回到了地球。<br><br>你的发现震惊了科学界：K-774是一个完整的超个体生态系统，每一个元素都是相互连接的。红色植物、蓝色晶体、紫色地衣、裂隙猎手、异星生物——它们都是同一个生命的不同器官。<br><br>人类开始重新审视"生命"的定义。而你的名字，被写进了教科书。<br><br>但每当夜深人静，你仍能听到滴答声。K-774没有忘记你。它在等待下一次接触。<br><br>【新结局：带回知识的人】',
+      truth: [0, 1, 2, 3, 4, 5, 6, 7, 8]
     }
   },
   ending_merge: {
@@ -865,7 +958,7 @@ function consumeItem(itemName) {
   if (idx !== -1) { GameState.inventory.splice(idx, 1); addLog('消耗了 ' + itemName); updateBackpack(); }
 }
 
-var QUEST_ITEMS = ['规则纸条', '数据核心', '红色孢子样本', '紫色地衣样本', '燃料晶体', '完整笔记', '引擎核心', '切割器', '信号发射器', '数据平板', '金属样本罐', '发光虫尸体', '荆棘刺', '望远镜', '备用电池', '古老岩画拓片', '透明冰晶'];
+var QUEST_ITEMS = ['规则纸条', '数据核心', '红色孢子样本', '紫色地衣样本', '燃料晶体', '完整笔记', '引擎核心', '切割器', '信号发射器', '数据平板', '金属样本罐', '发光虫尸体', '荆棘刺', '望远镜', '备用电池', '古老岩画拓片', '透明冰晶', '脉冲步枪', '营地情报'];
 var HEAL_ITEMS = ['医疗包', '氧气罐', '应急补给'];
 
 function updateBackpack() {
@@ -1051,7 +1144,7 @@ function showEnding(sceneId) {
     if (descEl) descEl.textContent = '你的氧气耗尽，或伤势过重。K-774接纳了你，就像它接纳了所有前任一样。你的宇航服将成为新的生态位，你的故事将成为下一个宇航员捡到的纸条。';
     if (truthEl) truthEl.innerHTML = '';
   } else {
-    if (titleEl) { titleEl.textContent = scene.ending.title; titleEl.style.color = sceneId === 'ending_merge' ? 'var(--accent-purple)' : sceneId === 'ending_escape' ? 'var(--accent-blue)' : sceneId === 'hidden_path' ? 'var(--accent-green)' : 'var(--accent-red)'; }
+    if (titleEl) { titleEl.textContent = scene.ending.title; titleEl.style.color = sceneId === 'ending_merge' ? 'var(--accent-purple)' : sceneId === 'ending_escape' ? 'var(--accent-blue)' : sceneId === 'hidden_path' ? 'var(--accent-green)' : sceneId === 'ending_knowledge' ? 'var(--accent-amber)' : 'var(--accent-red)'; }
     if (descEl) descEl.innerHTML = highlightText(scene.ending.desc);
     if (truthEl && scene.ending.truth) {
       var truthHtml = '<div style="color:var(--accent-purple);font-weight:bold;margin-bottom:8px;">【本次探索揭示的真相】</div>';
